@@ -1,0 +1,14 @@
+[
+  {
+    "id": "Dies Natalis",
+    "description": "Perayaan ulang tahun universitas",
+    "color": "#7c3aed",
+    "edge_modifiers": {
+      "E01": 2.5,
+      "E03": 1.8
+    },
+    "blocked_edges": [
+      "E33"
+    ]
+  }
+]

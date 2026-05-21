@@ -1,0 +1,9 @@
+{
+  "edge_conditions": {
+    "CE139": {
+      "status": "CLOSED",
+      "severity": 999
+    }
+  },
+  "edge_directions": {}
+}

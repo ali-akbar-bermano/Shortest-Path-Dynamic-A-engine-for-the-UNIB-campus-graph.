@@ -1,0 +1,1514 @@
+{
+  "metadata": {
+    "campus_name": "Universitas Bengkulu - Kampus Utama Kandang Limun",
+    "center_lat": -3.7589814,
+    "center_lon": 102.2728452,
+    "source_note": "Generated from campus_data.py; POI and road polylines use public coordinate references for display on map tiles.",
+    "last_modified": "2026-05-07T14:29:05"
+  },
+  "nodes": [
+    {
+      "id": "G1",
+      "name": "Gerbang Masuk Utama",
+      "type": "ENTRY",
+      "lat": -3.7606645,
+      "lon": 102.2726627,
+      "x": 414,
+      "y": 427
+    },
+    {
+      "id": "G2",
+      "name": "Gerbang Keluar Timur",
+      "type": "ENTRY",
+      "lat": -3.7596047,
+      "lon": 102.2760572,
+      "x": 636,
+      "y": 359
+    },
+    {
+      "id": "G3",
+      "name": "Gerbang Budi Utomo",
+      "type": "ENTRY",
+      "lat": -3.7592762,
+      "lon": 102.2671813,
+      "x": 55,
+      "y": 338
+    },
+    {
+      "id": "RK",
+      "name": "Gedung Rektorat",
+      "type": "BUILDING",
+      "lat": -3.7593715,
+      "lon": 102.2723414,
+      "x": 393,
+      "y": 344
+    },
+    {
+      "id": "GLT",
+      "name": "Gedung Layanan Terpadu",
+      "type": "BUILDING",
+      "lat": -3.7581402,
+      "lon": 102.2719062,
+      "x": 364,
+      "y": 265
+    },
+    {
+      "id": "ATM",
+      "name": "Pusat ATM UNIB",
+      "type": "FACILITY",
+      "lat": -3.7601397,
+      "lon": 102.271743,
+      "x": 354,
+      "y": 393
+    },
+    {
+      "id": "BNI",
+      "name": "BNI Unit UNIB",
+      "type": "FACILITY",
+      "lat": -3.7614862,
+      "lon": 102.2717217,
+      "x": 352,
+      "y": 479
+    },
+    {
+      "id": "DI",
+      "name": "Danau Inspirasi",
+      "type": "OPEN",
+      "lat": -3.7589256,
+      "lon": 102.2732441,
+      "x": 452,
+      "y": 315
+    },
+    {
+      "id": "DU",
+      "name": "Danau Ilmu",
+      "type": "OPEN",
+      "lat": -3.7574442,
+      "lon": 102.2731791,
+      "x": 448,
+      "y": 220
+    },
+    {
+      "id": "PERP",
+      "name": "UPT Perpustakaan",
+      "type": "FACILITY",
+      "lat": -3.7568392,
+      "lon": 102.2748198,
+      "x": 555,
+      "y": 181
+    },
+    {
+      "id": "LPTIK",
+      "name": "UPA TIK / LPTIK",
+      "type": "BUILDING",
+      "lat": -3.7584465,
+      "lon": 102.2749505,
+      "x": 564,
+      "y": 284
+    },
+    {
+      "id": "FISIP",
+      "name": "FISIP",
+      "type": "BUILDING",
+      "lat": -3.7590995,
+      "lon": 102.2745522,
+      "x": 538,
+      "y": 326
+    },
+    {
+      "id": "FKIP",
+      "name": "Dekanat FKIP",
+      "type": "BUILDING",
+      "lat": -3.7576995,
+      "lon": 102.2751013,
+      "x": 574,
+      "y": 237
+    },
+    {
+      "id": "LABFKIP",
+      "name": "Lab Pembelajaran FKIP",
+      "type": "BUILDING",
+      "lat": -3.7582292,
+      "lon": 102.2757117,
+      "x": 614,
+      "y": 270
+    },
+    {
+      "id": "FMIPA",
+      "name": "Dekanat MIPA",
+      "type": "BUILDING",
+      "lat": -3.7560482,
+      "lon": 102.2748329,
+      "x": 556,
+      "y": 131
+    },
+    {
+      "id": "GSG",
+      "name": "Gedung Serba Guna",
+      "type": "BUILDING",
+      "lat": -3.7577209,
+      "lon": 102.2765727,
+      "x": 670,
+      "y": 238
+    },
+    {
+      "id": "FT",
+      "name": "Dekanat Teknik",
+      "type": "BUILDING",
+      "lat": -3.7586143,
+      "lon": 102.276663,
+      "x": 676,
+      "y": 295
+    },
+    {
+      "id": "LABTEK",
+      "name": "Lab Terpadu Teknik",
+      "type": "BUILDING",
+      "lat": -3.7589453,
+      "lon": 102.2768377,
+      "x": 687,
+      "y": 316
+    },
+    {
+      "id": "FKIK",
+      "name": "FKIK",
+      "type": "BUILDING",
+      "lat": -3.7548674,
+      "lon": 102.2779718,
+      "x": 762,
+      "y": 55
+    },
+    {
+      "id": "STAD",
+      "name": "Stadion UNIB",
+      "type": "OPEN",
+      "lat": -3.7577275,
+      "lon": 102.2780231,
+      "x": 765,
+      "y": 238
+    },
+    {
+      "id": "MSB",
+      "name": "Masjid Al-Barru",
+      "type": "FACILITY",
+      "lat": -3.7590596,
+      "lon": 102.2759543,
+      "x": 630,
+      "y": 324
+    },
+    {
+      "id": "MSD",
+      "name": "Masjid Darul Ulum",
+      "type": "FACILITY",
+      "lat": -3.7573819,
+      "lon": 102.2675556,
+      "x": 80,
+      "y": 216
+    },
+    {
+      "id": "SC",
+      "name": "Sport Center",
+      "type": "OPEN",
+      "lat": -3.7607713,
+      "lon": 102.2676926,
+      "x": 88,
+      "y": 433
+    },
+    {
+      "id": "FH",
+      "name": "Fakultas Hukum",
+      "type": "BUILDING",
+      "lat": -3.7606953,
+      "lon": 102.2683459,
+      "x": 131,
+      "y": 429
+    },
+    {
+      "id": "FEB",
+      "name": "Dekanat FEB",
+      "type": "BUILDING",
+      "lat": -3.7616179,
+      "lon": 102.2684234,
+      "x": 136,
+      "y": 488
+    },
+    {
+      "id": "GDS",
+      "name": "Gedung S FEB",
+      "type": "BUILDING",
+      "lat": -3.7618879,
+      "lon": 102.2689646,
+      "x": 172,
+      "y": 505
+    },
+    {
+      "id": "FP",
+      "name": "Dekanat Fakultas Pertanian",
+      "type": "BUILDING",
+      "lat": -3.759575,
+      "lon": 102.2691479,
+      "x": 184,
+      "y": 357
+    },
+    {
+      "id": "LABTAN",
+      "name": "Lab Tanah FP",
+      "type": "BUILDING",
+      "lat": -3.7594244,
+      "lon": 102.2699985,
+      "x": 239,
+      "y": 347
+    },
+    {
+      "id": "UPTB",
+      "name": "UPT Bahasa",
+      "type": "BUILDING",
+      "lat": -3.760757,
+      "lon": 102.2703534,
+      "x": 263,
+      "y": 433
+    }
+  ],
+  "edges": [
+    {
+      "id": "E01",
+      "from": "G1",
+      "to": "RK",
+      "distance": 153.2,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7606645,
+          102.2726627
+        ],
+        [
+          -3.7603494,
+          102.2727351
+        ],
+        [
+          -3.75994,
+          102.27256
+        ],
+        [
+          -3.7593715,
+          102.2723414
+        ]
+      ]
+    },
+    {
+      "id": "E02",
+      "from": "G1",
+      "to": "ATM",
+      "distance": 119.6,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7606645,
+          102.2726627
+        ],
+        [
+          -3.7604324,
+          102.2724178
+        ],
+        [
+          -3.76025,
+          102.2721
+        ],
+        [
+          -3.7601397,
+          102.271743
+        ]
+      ]
+    },
+    {
+      "id": "E03",
+      "from": "ATM",
+      "to": "RK",
+      "distance": 113.3,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7601397,
+          102.271743
+        ],
+        [
+          -3.7599,
+          102.27212
+        ],
+        [
+          -3.7593715,
+          102.2723414
+        ]
+      ]
+    },
+    {
+      "id": "E04",
+      "from": "ATM",
+      "to": "BNI",
+      "distance": 200.4,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7601397,
+          102.271743
+        ],
+        [
+          -3.7606961,
+          102.2723263
+        ],
+        [
+          -3.761,
+          102.27205
+        ],
+        [
+          -3.7614862,
+          102.2717217
+        ]
+      ]
+    },
+    {
+      "id": "E05",
+      "from": "BNI",
+      "to": "FEB",
+      "distance": 493.0,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7614862,
+          102.2717217
+        ],
+        [
+          -3.7619,
+          102.2708
+        ],
+        [
+          -3.7622796,
+          102.2707777
+        ],
+        [
+          -3.7624737,
+          102.2686136
+        ],
+        [
+          -3.7616179,
+          102.2684234
+        ]
+      ]
+    },
+    {
+      "id": "E06",
+      "from": "BNI",
+      "to": "UPTB",
+      "distance": 248.7,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7614862,
+          102.2717217
+        ],
+        [
+          -3.76105,
+          102.2711
+        ],
+        [
+          -3.7607419,
+          102.2700076
+        ],
+        [
+          -3.760757,
+          102.2703534
+        ]
+      ]
+    },
+    {
+      "id": "E07",
+      "from": "UPTB",
+      "to": "FH",
+      "distance": 241.3,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.760757,
+          102.2703534
+        ],
+        [
+          -3.7608143,
+          102.2696864
+        ],
+        [
+          -3.7604308,
+          102.2686681
+        ],
+        [
+          -3.7606953,
+          102.2683459
+        ]
+      ]
+    },
+    {
+      "id": "E08",
+      "from": "FH",
+      "to": "FEB",
+      "distance": 102.9,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7606953,
+          102.2683459
+        ],
+        [
+          -3.76125,
+          102.26839
+        ],
+        [
+          -3.7616179,
+          102.2684234
+        ]
+      ]
+    },
+    {
+      "id": "E09",
+      "from": "FEB",
+      "to": "GDS",
+      "distance": 69.8,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7616179,
+          102.2684234
+        ],
+        [
+          -3.76185,
+          102.2687
+        ],
+        [
+          -3.7618879,
+          102.2689646
+        ]
+      ]
+    },
+    {
+      "id": "E10",
+      "from": "FH",
+      "to": "SC",
+      "distance": 248.0,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7606953,
+          102.2683459
+        ],
+        [
+          -3.76035,
+          102.2679
+        ],
+        [
+          -3.759734,
+          102.2678435
+        ],
+        [
+          -3.7607713,
+          102.2676926
+        ]
+      ]
+    },
+    {
+      "id": "E11",
+      "from": "SC",
+      "to": "G3",
+      "distance": 391.1,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7607713,
+          102.2676926
+        ],
+        [
+          -3.7600324,
+          102.2659402
+        ],
+        [
+          -3.7598144,
+          102.2669542
+        ],
+        [
+          -3.7592762,
+          102.2671813
+        ]
+      ]
+    },
+    {
+      "id": "E12",
+      "from": "G3",
+      "to": "MSD",
+      "distance": 224.0,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7592762,
+          102.2671813
+        ],
+        [
+          -3.7585883,
+          102.2674505
+        ],
+        [
+          -3.757522,
+          102.2676784
+        ],
+        [
+          -3.7573819,
+          102.2675556
+        ]
+      ]
+    },
+    {
+      "id": "E13",
+      "from": "MSD",
+      "to": "FP",
+      "distance": 446.2,
+      "surface": "CONCRETE",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7573819,
+          102.2675556
+        ],
+        [
+          -3.75815,
+          102.26845
+        ],
+        [
+          -3.7590164,
+          102.2700266
+        ],
+        [
+          -3.759575,
+          102.2691479
+        ]
+      ]
+    },
+    {
+      "id": "E14",
+      "from": "FP",
+      "to": "LABTAN",
+      "distance": 95.9,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.759575,
+          102.2691479
+        ],
+        [
+          -3.7595,
+          102.2696
+        ],
+        [
+          -3.7594244,
+          102.2699985
+        ]
+      ]
+    },
+    {
+      "id": "E15",
+      "from": "LABTAN",
+      "to": "RK",
+      "distance": 363.1,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7594244,
+          102.2699985
+        ],
+        [
+          -3.7590164,
+          102.2700266
+        ],
+        [
+          -3.759038,
+          102.2715708
+        ],
+        [
+          -3.7588463,
+          102.2723387
+        ],
+        [
+          -3.7593715,
+          102.2723414
+        ]
+      ]
+    },
+    {
+      "id": "E16",
+      "from": "LABTAN",
+      "to": "UPTB",
+      "distance": 246.4,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7594244,
+          102.2699985
+        ],
+        [
+          -3.7590164,
+          102.2700266
+        ],
+        [
+          -3.7601,
+          102.27005
+        ],
+        [
+          -3.760757,
+          102.2703534
+        ]
+      ]
+    },
+    {
+      "id": "E17",
+      "from": "UPTB",
+      "to": "ATM",
+      "distance": 171.8,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.760757,
+          102.2703534
+        ],
+        [
+          -3.76025,
+          102.27115
+        ],
+        [
+          -3.7601397,
+          102.271743
+        ]
+      ]
+    },
+    {
+      "id": "E18",
+      "from": "RK",
+      "to": "GLT",
+      "distance": 248.9,
+      "surface": "CONCRETE",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7593715,
+          102.2723414
+        ],
+        [
+          -3.7588463,
+          102.2723387
+        ],
+        [
+          -3.7582684,
+          102.2728453
+        ],
+        [
+          -3.7581402,
+          102.2719062
+        ]
+      ]
+    },
+    {
+      "id": "E19",
+      "from": "GLT",
+      "to": "DU",
+      "distance": 398.3,
+      "surface": "CONCRETE",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7581402,
+          102.2719062
+        ],
+        [
+          -3.7580058,
+          102.2734542
+        ],
+        [
+          -3.7574993,
+          102.2742605
+        ],
+        [
+          -3.7574442,
+          102.2731791
+        ]
+      ]
+    },
+    {
+      "id": "E20",
+      "from": "DU",
+      "to": "PERP",
+      "distance": 200.1,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7574442,
+          102.2731791
+        ],
+        [
+          -3.7568215,
+          102.2743
+        ],
+        [
+          -3.7568392,
+          102.2748198
+        ]
+      ]
+    },
+    {
+      "id": "E21",
+      "from": "DU",
+      "to": "FKIP",
+      "distance": 219.7,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7574442,
+          102.2731791
+        ],
+        [
+          -3.7574348,
+          102.2743909
+        ],
+        [
+          -3.75765,
+          102.2748
+        ],
+        [
+          -3.7576995,
+          102.2751013
+        ]
+      ]
+    },
+    {
+      "id": "E22",
+      "from": "PERP",
+      "to": "FKIP",
+      "distance": 193.2,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7568392,
+          102.2748198
+        ],
+        [
+          -3.7569278,
+          102.2756231
+        ],
+        [
+          -3.7576995,
+          102.2751013
+        ]
+      ]
+    },
+    {
+      "id": "E23",
+      "from": "FKIP",
+      "to": "FMIPA",
+      "distance": 446.2,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7576995,
+          102.2751013
+        ],
+        [
+          -3.7568724,
+          102.2767592
+        ],
+        [
+          -3.7561115,
+          102.2756633
+        ],
+        [
+          -3.7560482,
+          102.2748329
+        ]
+      ]
+    },
+    {
+      "id": "E24",
+      "from": "FKIP",
+      "to": "LABFKIP",
+      "distance": 90.1,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7576995,
+          102.2751013
+        ],
+        [
+          -3.75805,
+          102.27545
+        ],
+        [
+          -3.7582292,
+          102.2757117
+        ]
+      ]
+    },
+    {
+      "id": "E25",
+      "from": "LABFKIP",
+      "to": "GSG",
+      "distance": 260.7,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7582292,
+          102.2757117
+        ],
+        [
+          -3.7581668,
+          102.2771962
+        ],
+        [
+          -3.75772,
+          102.2769
+        ],
+        [
+          -3.7577209,
+          102.2765727
+        ]
+      ]
+    },
+    {
+      "id": "E26",
+      "from": "GSG",
+      "to": "FT",
+      "distance": 101.7,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7577209,
+          102.2765727
+        ],
+        [
+          -3.758291,
+          102.2765548
+        ],
+        [
+          -3.7585,
+          102.2766
+        ],
+        [
+          -3.7586143,
+          102.276663
+        ]
+      ]
+    },
+    {
+      "id": "E27",
+      "from": "FT",
+      "to": "LABTEK",
+      "distance": 41.6,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7586143,
+          102.276663
+        ],
+        [
+          -3.75876,
+          102.27675
+        ],
+        [
+          -3.7589453,
+          102.2768377
+        ]
+      ]
+    },
+    {
+      "id": "E28",
+      "from": "LABTEK",
+      "to": "G2",
+      "distance": 328.3,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7589453,
+          102.2768377
+        ],
+        [
+          -3.7594558,
+          102.2750155
+        ],
+        [
+          -3.7595758,
+          102.2753104
+        ],
+        [
+          -3.7596047,
+          102.2760572
+        ]
+      ]
+    },
+    {
+      "id": "E29",
+      "from": "G2",
+      "to": "MSB",
+      "distance": 97.8,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7596047,
+          102.2760572
+        ],
+        [
+          -3.7595,
+          102.2757
+        ],
+        [
+          -3.7590596,
+          102.2759543
+        ]
+      ]
+    },
+    {
+      "id": "E30",
+      "from": "MSB",
+      "to": "FISIP",
+      "distance": 160.1,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7590596,
+          102.2759543
+        ],
+        [
+          -3.75925,
+          102.2752
+        ],
+        [
+          -3.7590995,
+          102.2745522
+        ]
+      ]
+    },
+    {
+      "id": "E31",
+      "from": "FISIP",
+      "to": "LPTIK",
+      "distance": 85.5,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7590995,
+          102.2745522
+        ],
+        [
+          -3.7588548,
+          102.2747514
+        ],
+        [
+          -3.7584465,
+          102.2749505
+        ]
+      ]
+    },
+    {
+      "id": "E32",
+      "from": "LPTIK",
+      "to": "DI",
+      "distance": 289.4,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7584465,
+          102.2749505
+        ],
+        [
+          -3.7582747,
+          102.2749172
+        ],
+        [
+          -3.7580058,
+          102.2734542
+        ],
+        [
+          -3.7589256,
+          102.2732441
+        ]
+      ]
+    },
+    {
+      "id": "E33",
+      "from": "DI",
+      "to": "RK",
+      "distance": 279.3,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7589256,
+          102.2732441
+        ],
+        [
+          -3.759038,
+          102.2715708
+        ],
+        [
+          -3.7593715,
+          102.2723414
+        ]
+      ]
+    },
+    {
+      "id": "E34",
+      "from": "DI",
+      "to": "FISIP",
+      "distance": 270.1,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7589256,
+          102.2732441
+        ],
+        [
+          -3.7594558,
+          102.2750155
+        ],
+        [
+          -3.7590995,
+          102.2745522
+        ]
+      ]
+    },
+    {
+      "id": "E35",
+      "from": "LPTIK",
+      "to": "MSB",
+      "distance": 163.8,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7584465,
+          102.2749505
+        ],
+        [
+          -3.75915,
+          102.27525
+        ],
+        [
+          -3.7590596,
+          102.2759543
+        ]
+      ]
+    },
+    {
+      "id": "E36",
+      "from": "FT",
+      "to": "STAD",
+      "distance": 181.2,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7586143,
+          102.276663
+        ],
+        [
+          -3.7581668,
+          102.2771962
+        ],
+        [
+          -3.7577275,
+          102.2780231
+        ],
+        [
+          -3.7577275,
+          102.2780231
+        ]
+      ]
+    },
+    {
+      "id": "E37",
+      "from": "STAD",
+      "to": "FKIK",
+      "distance": 456.3,
+      "surface": "CONCRETE",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7577275,
+          102.2780231
+        ],
+        [
+          -3.7572369,
+          102.2792924
+        ],
+        [
+          -3.7553594,
+          102.2784595
+        ],
+        [
+          -3.7548674,
+          102.2779718
+        ]
+      ]
+    },
+    {
+      "id": "E38",
+      "from": "FKIK",
+      "to": "FMIPA",
+      "distance": 390.2,
+      "surface": "CONCRETE",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7548674,
+          102.2779718
+        ],
+        [
+          -3.7557631,
+          102.2769036
+        ],
+        [
+          -3.7561115,
+          102.2756633
+        ],
+        [
+          -3.7560482,
+          102.2748329
+        ]
+      ]
+    },
+    {
+      "id": "E39",
+      "from": "LABTEK",
+      "to": "STAD",
+      "distance": 277.2,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7589453,
+          102.2768377
+        ],
+        [
+          -3.7589338,
+          102.2781229
+        ],
+        [
+          -3.7577275,
+          102.2780231
+        ]
+      ]
+    },
+    {
+      "id": "E40",
+      "from": "G2",
+      "to": "FT",
+      "distance": 135.4,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7596047,
+          102.2760572
+        ],
+        [
+          -3.7590164,
+          102.2762
+        ],
+        [
+          -3.7586143,
+          102.276663
+        ],
+        [
+          -3.7586143,
+          102.276663
+        ]
+      ]
+    },
+    {
+      "id": "E41",
+      "from": "PERP",
+      "to": "LPTIK",
+      "distance": 253.3,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7568392,
+          102.2748198
+        ],
+        [
+          -3.7576556,
+          102.2741056
+        ],
+        [
+          -3.7582747,
+          102.2749172
+        ],
+        [
+          -3.7584465,
+          102.2749505
+        ]
+      ]
+    },
+    {
+      "id": "E42",
+      "from": "FISIP",
+      "to": "RK",
+      "distance": 427.9,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7590995,
+          102.2745522
+        ],
+        [
+          -3.7594558,
+          102.2750155
+        ],
+        [
+          -3.7588463,
+          102.2723387
+        ],
+        [
+          -3.7593715,
+          102.2723414
+        ]
+      ]
+    },
+    {
+      "id": "E43",
+      "from": "MSD",
+      "to": "GLT",
+      "distance": 866.0,
+      "surface": "CONCRETE",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7573819,
+          102.2675556
+        ],
+        [
+          -3.7568215,
+          102.2713468
+        ],
+        [
+          -3.7580058,
+          102.2734542
+        ],
+        [
+          -3.7581402,
+          102.2719062
+        ]
+      ]
+    },
+    {
+      "id": "E44",
+      "from": "FP",
+      "to": "FH",
+      "distance": 312.0,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.759575,
+          102.2691479
+        ],
+        [
+          -3.759734,
+          102.2678435
+        ],
+        [
+          -3.7604308,
+          102.2686681
+        ],
+        [
+          -3.7606953,
+          102.2683459
+        ]
+      ]
+    },
+    {
+      "id": "E45",
+      "from": "FEB",
+      "to": "SC",
+      "distance": 131.5,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7616179,
+          102.2684234
+        ],
+        [
+          -3.7612462,
+          102.26785
+        ],
+        [
+          -3.7607713,
+          102.2676926
+        ],
+        [
+          -3.7607713,
+          102.2676926
+        ]
+      ]
+    },
+    {
+      "id": "E46",
+      "from": "UPTB",
+      "to": "FP",
+      "distance": 316.6,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.760757,
+          102.2703534
+        ],
+        [
+          -3.7601,
+          102.27005
+        ],
+        [
+          -3.7590164,
+          102.2700266
+        ],
+        [
+          -3.759575,
+          102.2691479
+        ]
+      ]
+    },
+    {
+      "id": "E47",
+      "from": "MSB",
+      "to": "LABTEK",
+      "distance": 403.9,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7590596,
+          102.2759543
+        ],
+        [
+          -3.7594558,
+          102.2750155
+        ],
+        [
+          -3.759751,
+          102.276804
+        ],
+        [
+          -3.7589453,
+          102.2768377
+        ]
+      ]
+    },
+    {
+      "id": "E48",
+      "from": "G2",
+      "to": "STAD",
+      "distance": 391.3,
+      "surface": "ASPHALT",
+      "bidirectional": true,
+      "accessible": true,
+      "geometry": [
+        [
+          -3.7596047,
+          102.2760572
+        ],
+        [
+          -3.759751,
+          102.276804
+        ],
+        [
+          -3.7589338,
+          102.2781229
+        ],
+        [
+          -3.7577275,
+          102.2780231
+        ]
+      ]
+    }
+  ]
+}

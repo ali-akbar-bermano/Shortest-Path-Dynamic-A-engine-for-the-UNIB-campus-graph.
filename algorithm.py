@@ -27,16 +27,10 @@ CONDITION_MULTIPLIER: Dict[str, float] = {
 
 SCENARIO_MODIFIERS: Dict[str, Dict[str, float]] = {
     "Normal": {},
-    "Wisuda": {},
-    "UTBK": {},
-    "Event Besar": {},
 }
 
 SCENARIO_BLOCKED: Dict[str, Set[str]] = {
     "Normal": set(),
-    "Wisuda": set(),
-    "UTBK": set(),
-    "Event Besar": set(),
 }
 
 # Global cache untuk overlap detection (built once at startup)
@@ -242,6 +236,9 @@ def _split_long_edges(edges: list, nodes: dict, max_length_m: float = 120.0) -> 
         
         # If edge is short enough, keep as-is
         if total_dist <= max_length_m:
+            if "condition_id" not in edge:
+                edge = dict(edge)
+                edge["condition_id"] = edge["id"]
             result_edges.append(edge)
             continue
         
@@ -273,6 +270,7 @@ def _split_long_edges(edges: list, nodes: dict, max_length_m: float = 120.0) -> 
         
         # Create edge for each segment
         current_from = edge["from"]
+        cond_id = edge.get("condition_id", edge["id"])
         for idx, (seg_geom, seg_dist) in enumerate(segments):
             if idx == len(segments) - 1:
                 # Last segment - use original destination
@@ -299,6 +297,7 @@ def _split_long_edges(edges: list, nodes: dict, max_length_m: float = 120.0) -> 
                 "surface": edge.get("surface", "asphalt"),
                 "bidirectional": edge.get("bidirectional", True),
                 "geometry": seg_geom,
+                "condition_id": cond_id,
             }
             result_edges.append(new_edge)
             current_from = seg_to
@@ -714,6 +713,8 @@ def build_engine() -> Engine:
             }
         )
 
+    SCENARIO_MODIFIERS.clear()
+    SCENARIO_BLOCKED.clear()
     for scenario_enum, config in SCENARIO_CONFIG.items():
         scenario = scenario_enum.value
         SCENARIO_MODIFIERS[scenario] = config.get("edge_modifiers", {})

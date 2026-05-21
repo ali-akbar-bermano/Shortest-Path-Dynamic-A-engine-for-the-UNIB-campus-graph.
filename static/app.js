@@ -8,13 +8,7 @@ let edgeLayers = {},
   conditions = {},
   nodeById = {},
   edgeById = {};
-let isDrawing = false,
-  drawEdgeId = null,
-  drawPoints = [],
-  drawPolyline = null;
-let drawTempLine = null,
-  drawDots = [],
-  drawSnapLine = null;
+
 let pickRouteFrom = null; // for pick_route mode
 
 // ── Map ────────────────────────────────────────────────────
@@ -28,17 +22,16 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 
 map.on("click", async (e) => {
-  if (isDrawing) {
-    addDrawPoint(e.latlng);
-    return;
-  }
   // Add node (building)
   if (mapMode === "add_node") {
     const name = prompt("Masukkan nama gedung/titik baru:");
     if (!name) return;
-    let type = prompt("Masukkan jenis (Gedung / Gerbang / Fasilitas / Parkir):", "Gedung");
+    let type = prompt(
+      "Masukkan jenis (Gedung / Gerbang / Fasilitas / Parkir):",
+      "Gedung",
+    );
     if (!type) type = "Gedung";
-    
+
     setStepIndicator("⏳ Menambahkan titik…");
     try {
       const r = await fetch("/api/nodes", {
@@ -125,12 +118,7 @@ map.on("click", async (e) => {
     return;
   }
 });
-map.on("dblclick", (e) => {
-  if (isDrawing) {
-    L.DomEvent.stopPropagation(e);
-    finishDraw();
-  }
-});
+
 map.on("contextmenu", (e) => {
   // Right-click cancels chain mode
   if (mapMode === "add_edge" && addEdgeFrom) {
@@ -140,16 +128,7 @@ map.on("contextmenu", (e) => {
     showAlert("Chain dibatalkan", "info");
   }
 });
-map.on("mousemove", (e) => {
-  if (!isDrawing || drawPoints.length === 0) return;
-  if (drawTempLine) map.removeLayer(drawTempLine);
-  drawTempLine = L.polyline([drawPoints[drawPoints.length - 1], e.latlng], {
-    color: "#f59e0b",
-    weight: 2.5,
-    dashArray: "8,6",
-    opacity: 0.8,
-  }).addTo(map);
-});
+
 
 // ── Clock ──────────────────────────────────────────────────
 function updateClock() {
@@ -225,7 +204,10 @@ function nodeIcon(type, isStart, isEnd) {
 }
 
 function edgeColor(id) {
-  const ec = (conditions.edge_conditions || {})[id];
+  const edge = edgeById[id];
+  const condId = edge ? (edge.condition_id || edge.id) : id;
+
+  const ec = (conditions.edge_conditions || {})[id] || (conditions.edge_conditions || {})[condId];
   if (ec) {
     const s = (ec.status || ec.type || "NORMAL").toUpperCase();
     if (s === "CLOSED") return "#ef4444";
@@ -239,8 +221,8 @@ function edgeColor(id) {
   if (selSc && graph) {
     const sc = graph.scenarios.find((s) => s.id === selSc.value);
     if (sc) {
-      if ((sc.blocked_edges || []).includes(id)) return "#ef4444";
-      if (sc.edge_modifiers && sc.edge_modifiers[id])
+      if ((sc.blocked_edges || []).includes(id) || (sc.blocked_edges || []).includes(condId)) return "#ef4444";
+      if (sc.edge_modifiers && (sc.edge_modifiers[id] || sc.edge_modifiers[condId]))
         return sc.color || "#d97706";
     }
   }
@@ -269,6 +251,7 @@ async function loadGraph() {
     graph.edges.forEach((e) => (edgeById[e.id] = e));
     populateSelects();
     populateScenarios();
+    populateLocationSelect();
     drawEdges();
     drawNodes();
     renderScenarioCards();
@@ -348,7 +331,10 @@ function populateScenarios() {
   affDiv.style.display = "block";
   let html = "";
   for (const [eid, mul] of Object.entries(mods)) {
-    const e = edgeById[eid];
+    let e = edgeById[eid];
+    if (!e && graph && graph.edges) {
+      e = graph.edges.find((edge) => edge.condition_id === eid || edge.id === eid);
+    }
     const label = e
       ? `${eid} (${nodeById[e.from]?.name?.substring(0, 12) || e.from} → ${nodeById[e.to]?.name?.substring(0, 12) || e.to})`
       : eid;
@@ -377,8 +363,9 @@ function drawEdges() {
   graph.edges.forEach((e) => {
     const ll = e.geometry.map((p) => [p[0], p[1]]);
     const c = edgeColor(e.id);
-    const isBlocked = blocked.includes(e.id);
-    const isMod = !!mods[e.id];
+    const condId = e.condition_id || e.id;
+    const isBlocked = blocked.includes(e.id) || blocked.includes(condId);
+    const isMod = !!mods[e.id] || !!mods[condId];
     // Unified styling: all roads same thickness and opacity, except when blocked
     const w = isBlocked ? 5 : isMod ? 4.5 : 3.5;
     const op = isBlocked ? 0.35 : isMod ? 0.75 : 0.6;
@@ -394,7 +381,7 @@ function drawEdges() {
       interactive: true,
       smoothFactor: 0.5,
     }).addTo(map);
-    const ttMod = isMod ? ` ⚠×${mods[e.id]}` : "";
+    const ttMod = isMod ? ` ⚠×${mods[e.id] || mods[condId]}` : "";
     const ttBlock = isBlocked ? " 🚫DITUTUP" : "";
     const handleClick = (ev) => onEdgeClick(e, ev);
     line.on("click", handleClick);
@@ -541,15 +528,14 @@ async function handleAddEdgeNode(nodeId, nodeName) {
       return;
     }
     // Show confirmation modal
-    const fromName = String(nodeById[addEdgeFrom]?.name || addEdgeFrom || "").substring(
-      0,
-      30,
-    );
+    const fromName = String(
+      nodeById[addEdgeFrom]?.name || addEdgeFrom || "",
+    ).substring(0, 30);
     const toName = String(nodeName || nodeId || "").substring(0, 30);
     _addEdgePendingTo = nodeId;
     _addEdgePendingToName = nodeName;
     document.getElementById("add-edge-modal-desc").innerHTML =
-      `<strong style="color:#e2e8f0">${fromName}</strong> → <strong style="color:#e2e8f0">${toName}</strong>`;
+      `<strong style="color:var(--teal)">${fromName}</strong> → <strong style="color:var(--teal)">${toName}</strong>`;
     document.getElementById("add-edge-distance-input").value = "";
     document.getElementById("add-edge-dir-input").value = "true";
     const modal = document.getElementById("add-edge-modal");
@@ -651,7 +637,6 @@ async function createRoadPoint(lat, lon) {
 
 // ── Map Mode ───────────────────────────────────────────────
 function setMapMode(mode) {
-  if (isDrawing) cancelDraw();
   closeEdgeEditor();
   mapMode = mapMode === mode ? null : mode;
   const ind = document.getElementById("edge-step-indicator");
@@ -681,12 +666,26 @@ function setMapMode(mode) {
     ind && ind.classList.add("visible");
     setStepIndicator("🏢 Klik peta untuk tambah Gedung");
     showAlert("Klik lokasi gedung baru di peta", "info");
+  } else if (mapMode === "pick_route") {
+    const btn = document.getElementById("btn-pick-route");
+    if (btn) btn.classList.add("active");
+    ind && ind.classList.add("visible");
+    pickRouteFrom = null;
+    setStepIndicator("🟢 Klik gedung awal untuk mulai rute");
+    showAlert("Mode Pilih Rute: Klik gedung awal di peta, lalu gedung tujuan.", "info");
   } else {
     // Mode dinonaktifkan
     ind && ind.classList.remove("visible");
     addEdgeFrom = null;
+    pickRouteFrom = null;
   }
   map.getContainer().style.cursor = mapMode ? "crosshair" : "";
+
+  // Auto-close burger menu dropdown on mobile
+  const dropdown = document.getElementById("map-tools-dropdown");
+  if (dropdown) {
+    dropdown.classList.remove("expanded");
+  }
 }
 
 // ── Edge Editor Panel ─────────────────────────────────────
@@ -708,16 +707,23 @@ function onEdgeClick(edge, ev) {
         return;
       }
     }
-    
+
     // Check if near an existing node (snap threshold ~25px)
-    let nearNode = null, nearDist = Infinity;
+    let nearNode = null,
+      nearDist = Infinity;
     if (graph && graph.nodes) {
       for (const n of graph.nodes) {
         try {
-          const d = map.latLngToLayerPoint([n.lat, n.lon])
+          const d = map
+            .latLngToLayerPoint([n.lat, n.lon])
             .distanceTo(map.latLngToLayerPoint([lat, lon]));
-          if (d < 25 && d < nearDist) { nearDist = d; nearNode = n; }
-        } catch (err) { /* skip */ }
+          if (d < 25 && d < nearDist) {
+            nearDist = d;
+            nearNode = n;
+          }
+        } catch (err) {
+          /* skip */
+        }
       }
     }
     if (nearNode) {
@@ -732,7 +738,10 @@ function onEdgeClick(edge, ev) {
             await loadGraph();
             handleAddEdgeNode(d.id, d.node?.name || d.id);
             const snapMsg = d.snapped ? ` (tersambung ke ${d.split_edge})` : "";
-            showAlert(`✅ Titik jalan dibuat${snapMsg}. Klik lokasi berikutnya.`, "success");
+            showAlert(
+              `✅ Titik jalan dibuat${snapMsg}. Klik lokasi berikutnya.`,
+              "success",
+            );
           } else {
             showAlert(d.error || "Gagal membuat titik jalan", "error");
             setStepIndicator("📍 Klik titik pertama");
@@ -799,15 +808,15 @@ async function openEdgeEditor(edge) {
   let overlappingHtml = "";
   if (overlappingEdges.length > 0) {
     overlappingHtml = `
-      <div class="ee-section" style="background:#1e1b4b;border:1.5px solid #818cf8;border-radius:8px;padding:12px">
-        <div style="font-size:11px;color:#a5b4fc;font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">⚠️ JALAN SALING TINDIH (${overlappingEdges.length})</div>
-        <div style="font-size:10px;color:#d8b4fe;margin-bottom:8px">Jalan-jalan di bawah menempati lokasi yang sama. Ubah kondisi pada semua sekaligus:</div>
+      <div class="ee-section" style="background:rgba(37,99,235,0.06);border:1.5px solid var(--border);border-radius:8px;padding:12px">
+        <div style="font-size:11px;color:var(--teal);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px">⚠️ JALAN SALING TINDIH (${overlappingEdges.length})</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Jalan-jalan di bawah menempati lokasi yang sama. Ubah kondisi pada semua sekaligus:</div>
         <div style="display:grid;gap:4px;margin-bottom:8px">
           ${overlappingEdges
             .map(
               (e) => `
-            <div style="padding:6px;background:#0f172a;border-radius:5px;font-size:10px;color:#cbd5e1">
-              <b style="color:#a5b4fc">${e.id}</b> • ${e.from_name} → ${e.to_name} (${e.distance}m)
+            <div style="padding:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:5px;font-size:10px;color:var(--text)">
+              <b style="color:var(--teal)">${e.id}</b> • ${e.from_name} → ${e.to_name} (${e.distance}m)
             </div>
           `,
             )
@@ -826,24 +835,24 @@ async function openEdgeEditor(edge) {
   panel.innerHTML = `
     <div class="ee-header">
       <div style="overflow:hidden">
-        <div style="font-size:10px;color:#64748b;margin-bottom:1px">🛣 Ruas &nbsp;<b style="color:#94a3b8">${edge.id}</b></div>
-        <div style="font-size:12px;font-weight:600;color:#e2e8f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fromName} → ${toName}</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:1px">🛣 Ruas &nbsp;<b style="color:var(--text-muted)">${edge.id}</b></div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${fromName} → ${toName}</div>
       </div>
       <button class="ee-close" onclick="closeEdgeEditor()">✕</button>
     </div>
 
-    <div style="display:flex;border-bottom:1px solid #1e293b;background:#0f172a">
+    <div style="display:flex;border-bottom:1px solid var(--border);background:var(--bg-card)">
       <div style="flex:1;text-align:center;padding:8px 4px">
-        <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.5px">Jarak</div>
-        <div style="font-size:16px;font-weight:700;color:#38bdf8">${edge.distance}<span style="font-size:10px"> m</span></div>
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Jarak</div>
+        <div style="font-size:16px;font-weight:700;color:var(--teal)">${edge.distance}<span style="font-size:10px"> m</span></div>
       </div>
-      <div style="flex:1;text-align:center;padding:8px 4px;border-left:1px solid #1e293b;border-right:1px solid #1e293b">
-        <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.5px">Status</div>
+      <div style="flex:1;text-align:center;padding:8px 4px;border-left:1px solid var(--border);border-right:1px solid var(--border)">
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Status</div>
         <div style="font-size:11px;font-weight:700;color:${statusColor};margin-top:2px">${cur}</div>
       </div>
       <div style="flex:1;text-align:center;padding:8px 4px">
-        <div style="font-size:9px;color:#475569;text-transform:uppercase;letter-spacing:.5px">Bobot</div>
-        <div style="font-size:16px;font-weight:700;color:#a78bfa">×${parseFloat(sev).toFixed(1)}</div>
+        <div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Bobot</div>
+        <div style="font-size:16px;font-weight:700;color:var(--teal)">×${parseFloat(sev).toFixed(1)}</div>
       </div>
     </div>
 
@@ -860,15 +869,15 @@ async function openEdgeEditor(edge) {
     </div>
 
     <div class="ee-section">
-      <label style="margin-bottom:6px">⚖️ Bobot Kustom &nbsp;<b style="color:#a78bfa">×<span id="ee-wval">${parseFloat(sev).toFixed(1)}</span></b></label>
+      <label style="margin-bottom:6px">⚖️ Bobot Kustom &nbsp;<b style="color:var(--teal)">×<span id="ee-wval">${parseFloat(sev).toFixed(1)}</span></b></label>
       <input type="range" id="ee-weight" min="0.5" max="5" step="0.1" value="${sev}"
-        style="width:100%;accent-color:#7c3aed;margin-bottom:8px"
+        style="width:100%;accent-color:var(--teal);margin-bottom:8px"
         oninput="document.getElementById('ee-wval').textContent=parseFloat(this.value).toFixed(1)">
       <div style="display:flex;gap:6px">
         <input type="number" id="ee-weight-num" min="0.1" max="99" step="0.1" value="${sev}" placeholder="Ketik nilai..."
-          style="flex:1;padding:6px 8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#f8fafc;font-size:12px">
+          style="flex:1;padding:6px 8px;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
         <button onclick="setCondition('${edge.id}','CUSTOM',document.getElementById('ee-weight-num').value||document.getElementById('ee-weight').value)"
-          style="padding:6px 14px;background:#7c3aed;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px">Simpan</button>
+          style="padding:6px 14px;background:var(--teal);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px">Simpan</button>
       </div>
     </div>
 
@@ -876,12 +885,11 @@ async function openEdgeEditor(edge) {
       <label style="margin-bottom:6px">📏 Panjang Jalan</label>
       <div style="display:flex;gap:6px;align-items:center">
         <input type="number" id="ee-dist" value="${edge.distance}" step="0.1" min="0.1"
-          style="flex:1;padding:6px 8px;background:#0f172a;border:1px solid #334155;border-radius:6px;color:#f8fafc;font-size:12px">
-        <span style="color:#64748b;font-size:11px">m</span>
+          style="flex:1;padding:6px 8px;background:var(--bg-panel);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:12px">
+        <span style="color:var(--text-muted);font-size:11px">m</span>
         <button onclick="updateEdgeDist('${edge.id}',document.getElementById('ee-dist').value)"
           style="padding:6px 14px;background:#d97706;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px">Simpan</button>
       </div>
-      <button class="draw-road-btn" style="margin-top:8px;width:100%" onclick="startDraw('${edge.id}')">✏️ Gambar Ulang di Peta</button>
     </div>
 
     <div class="ee-section">
@@ -890,11 +898,11 @@ async function openEdgeEditor(edge) {
         <button id="ee-dir-bi" class="cond-btn ${isBidir ? "cb-normal active" : "cb-normal"}" onclick="setEdgeDir('${edge.id}',true)" style="flex:1;padding:8px;border-radius:8px">⇄ Dua Arah</button>
         <button id="ee-dir-one" class="cond-btn ${!isBidir ? "cb-busy active" : "cb-busy"}" onclick="setEdgeDir('${edge.id}',false)" style="flex:1;padding:8px;border-radius:8px">→ Satu Arah</button>
       </div>
-      <div id="ee-dir-detail" style="margin-top:8px;padding:10px;background:#0f172a;border-radius:8px;${isBidir ? "display:none" : ""}">
-        <div style="font-size:10px;color:#64748b;margin-bottom:6px">Arah perjalanan:</div>
-        <select id="ee-dir-from" style="width:100%;padding:6px;background:#1e293b;border:1px solid #334155;border-radius:5px;color:#f8fafc;font-size:11px;margin-bottom:4px">${optFrom}</select>
-        <div style="text-align:center;color:#14b8a6;font-size:18px">↓</div>
-        <select id="ee-dir-to" style="width:100%;padding:6px;background:#1e293b;border:1px solid #334155;border-radius:5px;color:#f8fafc;font-size:11px;margin-top:4px">${optTo}</select>
+      <div id="ee-dir-detail" style="margin-top:8px;padding:10px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;${isBidir ? "display:none" : ""}">
+        <div style="font-size:10px;color:var(--text-muted);margin-bottom:6px">Arah perjalanan:</div>
+        <select id="ee-dir-from" style="width:100%;padding:6px;background:var(--bg-panel);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;margin-bottom:4px">${optFrom}</select>
+        <div style="text-align:center;color:var(--teal);font-size:18px">↓</div>
+        <select id="ee-dir-to" style="width:100%;padding:6px;background:var(--bg-panel);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;margin-top:4px">${optTo}</select>
         <button onclick="updateEdgeDirection('${edge.id}',false,document.getElementById('ee-dir-from').value,document.getElementById('ee-dir-to').value)"
           style="width:100%;margin-top:8px;padding:7px;background:#d97706;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:12px">💾 Simpan Arah</button>
       </div>
@@ -963,8 +971,10 @@ function closeEdgeEditor() {
     );
     const mods = sc?.edge_modifiers || {};
     const blocked = sc?.blocked_edges || [];
-    const isMod = !!mods[editingEdgeId];
-    const isBlocked = blocked.includes(editingEdgeId);
+    const edge = edgeById[editingEdgeId];
+    const condId = edge ? (edge.condition_id || edge.id) : editingEdgeId;
+    const isMod = !!mods[editingEdgeId] || !!mods[condId];
+    const isBlocked = blocked.includes(editingEdgeId) || blocked.includes(condId);
     const w = isBlocked ? 5 : isMod ? 4.5 : 3.5;
     const op = isBlocked ? 0.35 : isMod ? 0.75 : 0.55;
     edgeLayers[editingEdgeId].setStyle({ weight: w, opacity: op });
@@ -1096,137 +1106,7 @@ async function deleteNode(id) {
   }
 }
 
-// ── Draw Road ──────────────────────────────────────────────
-function _calcDD() {
-  let t = 0;
-  for (let i = 1; i < drawPoints.length; i++)
-    t += drawPoints[i - 1].distanceTo(drawPoints[i]);
-  return Math.round(t * 10) / 10;
-}
 
-function _updateDP() {
-  const d = _calcDD(),
-    n = drawPoints.length;
-  document.getElementById("drp-dist-val").textContent = d.toFixed(1);
-  const sub = document.getElementById("drp-subtitle");
-  sub.textContent =
-    n === 0
-      ? "Klik pada peta mengikuti jalur jalan"
-      : n === 1
-        ? "1 titik — lanjutkan klik"
-        : `${n} titik — double-klik atau ✓ Terapkan`;
-  const ab = document.getElementById("drp-apply");
-  ab.disabled = n < 2;
-  ab.style.opacity = n < 2 ? ".4" : "1";
-  const ub = document.getElementById("drp-undo");
-  ub.disabled = n === 0;
-  ub.style.opacity = n === 0 ? ".4" : "1";
-}
-
-function startDraw(id) {
-  closeEdgeEditor();
-  drawPoints = [];
-  drawEdgeId = id;
-  isDrawing = true;
-  [drawPolyline, drawTempLine, drawSnapLine].forEach((l) => {
-    if (l) map.removeLayer(l);
-  });
-  drawPolyline = drawTempLine = drawSnapLine = null;
-  drawDots.forEach((d) => map.removeLayer(d));
-  drawDots = [];
-  if (edgeLayers[id]) {
-    drawSnapLine = L.polyline(edgeLayers[id].getLatLngs(), {
-      color: "#f59e0b",
-      weight: 6,
-      opacity: 0.35,
-      dashArray: "12,8",
-    }).addTo(map);
-    map.fitBounds(edgeLayers[id].getBounds(), {
-      padding: [60, 60],
-      maxZoom: 18,
-    });
-  }
-  document.getElementById("draw-road-panel").classList.add("visible");
-  document.getElementById("drp-edge-id").textContent = id;
-  map.getContainer().classList.add("map-drawing-cursor");
-  _updateDP();
-}
-
-function addDrawPoint(ll) {
-  drawPoints.push(ll);
-  const dot = L.circleMarker(ll, {
-    radius: 6,
-    color: "#f59e0b",
-    fillColor: "#fbbf24",
-    fillOpacity: 1,
-    weight: 2.5,
-  }).addTo(map);
-  dot.bindTooltip(`${drawPoints.length}`, {
-    permanent: true,
-    direction: "top",
-    className: "measure-label",
-    offset: [0, -10],
-  });
-  drawDots.push(dot);
-  if (drawPolyline) map.removeLayer(drawPolyline);
-  if (drawPoints.length > 1)
-    drawPolyline = L.polyline(drawPoints, {
-      color: "#f59e0b",
-      weight: 4,
-      opacity: 0.95,
-    }).addTo(map);
-  _updateDP();
-}
-
-function undoDraw() {
-  if (!drawPoints.length) return;
-  drawPoints.pop();
-  const d = drawDots.pop();
-  if (d) map.removeLayer(d);
-  if (drawPolyline) {
-    map.removeLayer(drawPolyline);
-    drawPolyline = null;
-  }
-  if (drawTempLine) {
-    map.removeLayer(drawTempLine);
-    drawTempLine = null;
-  }
-  if (drawPoints.length > 1)
-    drawPolyline = L.polyline(drawPoints, {
-      color: "#f59e0b",
-      weight: 4,
-      opacity: 0.95,
-    }).addTo(map);
-  _updateDP();
-}
-
-function finishDraw() {
-  if (drawPoints.length < 2) {
-    showAlert("Min 2 titik", "error");
-    return;
-  }
-  const d = _calcDD(),
-    tid = drawEdgeId;
-  cancelDraw(true);
-  if (tid && confirm(`Jarak: ${d}m\nTerapkan ke ${tid}?`))
-    updateEdgeDist(tid, d);
-  else showAlert(`Jarak: ${d}m (tidak diterapkan)`, "info");
-}
-
-function cancelDraw(keepId = false) {
-  isDrawing = false;
-  if (!keepId) drawEdgeId = null;
-  [drawPolyline, drawTempLine, drawSnapLine].forEach((l) => {
-    if (l) map.removeLayer(l);
-  });
-  drawPolyline = drawTempLine = drawSnapLine = null;
-  drawDots.forEach((d) => map.removeLayer(d));
-  drawDots = [];
-  drawPoints = [];
-  document.getElementById("draw-road-panel").classList.remove("visible");
-  map.getContainer().classList.remove("map-drawing-cursor");
-  map.getContainer().style.cursor = mapMode ? "crosshair" : "";
-}
 
 // ── Find Route (with loading + animation) ──────────────────
 async function findRoute() {
@@ -1320,64 +1200,7 @@ function clearRoute() {
   document.getElementById("metrics").style.display = "none";
   document.getElementById("alert").style.display = "none";
 }
-// ── Auto-Generate OSM Roads ──────────────────────────────
-async function generateOSMRoads() {
-  if (
-    !confirm(
-      "Fitur ini akan mengunduh semua jalan kaki/kendaraan dari OpenStreetMap di area kampus UNIB dan menjadikannya jalur di aplikasi.\n\nLanjutkan?",
-    )
-  )
-    return;
-  const btn = document.getElementById("btn-osm-sync");
-  const oldText = btn.textContent;
-  btn.textContent = "⏳ Mengunduh...";
-  btn.style.pointerEvents = "none";
-  btn.style.opacity = "0.7";
 
-  try {
-    const r = await fetch("/api/osm-sync", { method: "POST" });
-    const d = await r.json();
-    if (d.ok) {
-      showAlert(
-        `Berhasil! ${d.nodes_added} titik (waypoint) dan ${d.edges_added} jalan baru ditambahkan dari OSM.`,
-        "success",
-      );
-      await loadGraph();
-    } else {
-      showAlert(d.error || "Gagal mengunduh OSM", "error");
-    }
-  } catch (e) {
-    showAlert("Error: " + e.message, "error");
-  } finally {
-    btn.textContent = oldText;
-    btn.style.pointerEvents = "auto";
-    btn.style.opacity = "1";
-  }
-}
-
-async function clearOSMRoads() {
-  if (
-    !confirm(
-      "Apakah Anda yakin ingin menghapus semua titik dan jalan yang di-generate dari OSM?",
-    )
-  )
-    return;
-  const btn = document.getElementById("btn-osm-clear");
-  const oldText = btn.textContent;
-  btn.textContent = "⏳ Menghapus...";
-  try {
-    const r = await fetch("/api/osm-sync", { method: "DELETE" });
-    const d = await r.json();
-    if (d.ok) {
-      showAlert("Semua jalan dari OSM telah dihapus!", "success");
-      await loadGraph();
-    }
-  } catch (e) {
-    showAlert("Error: " + e.message, "error");
-  } finally {
-    btn.textContent = oldText;
-  }
-}
 
 // ── Compare Scenarios ──────────────────────────────────────
 async function compareScenarios() {
@@ -1510,9 +1333,7 @@ function renderScenarioCards() {
   graph.scenarios.forEach((sc) => {
     const mods = sc.edge_modifiers || {};
     const blocked = sc.blocked_edges || [];
-    const isBuiltin = ["Normal", "Wisuda", "UTBK", "Event Besar"].includes(
-      sc.id,
-    );
+    const isBuiltin = sc.id === "Normal";
     let tags = "";
     for (const [eid, mul] of Object.entries(mods))
       tags += `<span class="sc-tag">×${mul} ${eid}</span>`;
@@ -1532,6 +1353,113 @@ function renderScenarioCards() {
   });
 }
 
+// ── Helper untuk scenario based on location ──
+function populateLocationSelect() {
+  const sel = document.getElementById("sc-location-select");
+  if (!sel || !graph || !graph.nodes) return;
+
+  // Keep first option, add buildings
+  const buildings = graph.nodes.filter(
+    (n) => n.type !== "Waypoint" && !n.name.startsWith("WP_"),
+  );
+  buildings.forEach((n) => {
+    if (!sel.querySelector(`option[value="${n.id}"]`)) {
+      const opt = document.createElement("option");
+      opt.value = n.id;
+      opt.textContent = `${n.id} – ${n.name}`;
+      sel.appendChild(opt);
+    }
+  });
+}
+
+function getEdgesNearLocation(locationId, radiusMeters) {
+  if (!graph || !graph.nodes || !graph.edges) return [];
+
+  const location = graph.nodes.find((n) => n.id === locationId);
+  if (!location) return [];
+
+  const nearby = [];
+
+  for (const edge of graph.edges) {
+    const geometry = edge.geometry || [];
+    if (geometry.length < 2) continue;
+
+    // Cek jarak dari location ke setiap point di geometry
+    let minDist = Infinity;
+    for (const point of geometry) {
+      const dist = haversine(location.lat, location.lon, point[0], point[1]);
+      minDist = Math.min(minDist, dist);
+    }
+
+    if (minDist <= radiusMeters) {
+      nearby.push(edge);
+    }
+  }
+
+  return nearby;
+}
+
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371000; // Earth radius in meters
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+let _detectedEdges = [];
+
+function autoDetectEdgesNearLocation() {
+  const locationId = document.getElementById("sc-location-select").value;
+  const radius =
+    parseInt(document.getElementById("sc-location-radius").value) || 100;
+
+  if (!locationId) {
+    showAlert("Pilih gedung/lokasi terlebih dahulu", "error");
+    return;
+  }
+
+  _detectedEdges = getEdgesNearLocation(locationId, radius);
+
+  if (_detectedEdges.length === 0) {
+    showAlert(
+      `Tidak ada jalan dalam radius ${radius}m dari lokasi ini`,
+      "info",
+    );
+    document.getElementById("detected-edges-list").style.display = "none";
+    return;
+  }
+
+  // Populate list
+  const listDiv = document.getElementById("detected-edges-list");
+  listDiv.innerHTML = `<strong style="color:var(--teal)">${_detectedEdges.length} jalan ditemukan:</strong><br>`;
+  _detectedEdges.forEach((e) => {
+    const fromName = nodeById[e.from]?.name || e.from;
+    const toName = nodeById[e.to]?.name || e.to;
+    listDiv.innerHTML += `<div style="margin:4px 0;padding:6px;background:var(--bg-card);border:1px solid var(--border);border-radius:4px">
+      <span style="color:var(--teal);font-weight:600">${e.id}</span> • ${fromName} → ${toName} (${e.distance}m)
+    </div>`;
+  });
+  listDiv.style.display = "block";
+
+  showAlert(
+    `${_detectedEdges.length} jalan ditemukan. Pilih action untuk semua jalan ini.`,
+    "success",
+  );
+}
+
+function clearDetectedEdges() {
+  _detectedEdges = [];
+  document.getElementById("detected-edges-list").style.display = "none";
+  document.getElementById("sc-location-select").value = "";
+}
+
 async function addScenario() {
   const name = document.getElementById("new-sc-name").value.trim();
   const desc = document.getElementById("new-sc-desc").value.trim();
@@ -1544,6 +1472,7 @@ async function addScenario() {
     showAlert("Nama skenario wajib diisi", "error");
     return;
   }
+
   // Parse modifiers: "E01:2.0, E02:1.5"
   const edge_modifiers = {};
   if (modsRaw)
@@ -1551,12 +1480,21 @@ async function addScenario() {
       const [k, v] = p.trim().split(":");
       if (k && v) edge_modifiers[k.trim()] = parseFloat(v);
     });
-  const blocked_edges = blockedRaw
+
+  // Combine manual blocked edges with detected edges from location
+  let blocked_edges = blockedRaw
     ? blockedRaw
         .split(",")
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
+
+  // Add detected edges if any
+  if (_detectedEdges && _detectedEdges.length > 0) {
+    const detectedIds = _detectedEdges.map((e) => e.id);
+    blocked_edges = [...new Set([...blocked_edges, ...detectedIds])];
+  }
+
   try {
     const r = await fetch("/api/scenarios", {
       method: "POST",
@@ -1574,12 +1512,16 @@ async function addScenario() {
       showAlert(d.error, "error");
       return;
     }
-    showAlert(`Skenario "${name}" ditambahkan!`, "success");
+    showAlert(
+      `Skenario "${name}" ditambahkan! (${blocked_edges.length} jalan ditutup)`,
+      "success",
+    );
     // Clear form
     document.getElementById("new-sc-name").value = "";
     document.getElementById("new-sc-desc").value = "";
     document.getElementById("new-sc-mods").value = "";
     document.getElementById("new-sc-blocked").value = "";
+    clearDetectedEdges();
     loadGraph();
   } catch (e) {
     showAlert("Gagal: " + e.message, "error");
@@ -1614,7 +1556,6 @@ document.getElementById("sel-scenario").addEventListener("change", () => {
 document.addEventListener("keydown", (e) => {
   if (
     e.key === "Enter" &&
-    !isDrawing &&
     document.getElementById("tab-route").classList.contains("active")
   )
     findRoute();
@@ -1624,3 +1565,41 @@ document.addEventListener("keydown", (e) => {
 loadGraph();
 setTimeout(() => map.invalidateSize(), 200);
 window.addEventListener("resize", () => map.invalidateSize());
+
+// ── Map Tools Burger Menu ──────────────────────────────────
+function toggleMapTools(event) {
+  if (event) event.stopPropagation();
+  const dropdown = document.getElementById("map-tools-dropdown");
+  if (dropdown) {
+    dropdown.classList.toggle("expanded");
+  }
+}
+
+// Close mobile map tools dropdown when clicking outside
+document.addEventListener("click", (event) => {
+  const dropdown = document.getElementById("map-tools-dropdown");
+  const burger = document.getElementById("map-tools-burger");
+  if (dropdown && burger) {
+    const clickedInsideDropdown = dropdown.contains(event.target);
+    const clickedBurger = burger.contains(event.target);
+    if (!clickedInsideDropdown && !clickedBurger) {
+      dropdown.classList.remove("expanded");
+    }
+  }
+});
+
+// ── Toggle Sidebar (Mobile) ────────────────────────────────
+function toggleSidebar(event) {
+  if (event) event.stopPropagation();
+  document.body.classList.toggle("sidebar-collapsed");
+  const btn = document.getElementById("btn-toggle-sidebar");
+  if (btn) {
+    if (document.body.classList.contains("sidebar-collapsed")) {
+      btn.title = "Tampilkan Panel";
+    } else {
+      btn.title = "Sembunyikan Panel";
+    }
+  }
+  map.invalidateSize();
+  setTimeout(() => map.invalidateSize(), 300);
+}

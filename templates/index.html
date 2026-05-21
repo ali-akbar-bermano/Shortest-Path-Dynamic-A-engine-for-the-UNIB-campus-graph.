@@ -1,263 +1,605 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Navigasi kampus UNIB – Dynamic A* Shortest Path dengan skenario kondisi jalan real-time">
-<title>UNIB Campus Navigator – Shortest Path</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-
-<!-- ═══ HEADER ═══ -->
-<div id="header">
-  <span class="logo">🏫</span>
-  <h1>UNIB Campus Navigator</h1>
-  <div class="sub">Universitas Bengkulu – Dynamic A* Engine</div>
-  <div id="clock">--:--:--</div>
-</div>
-
-<!-- ═══ MAIN ═══ -->
-<div id="main">
-
-  <!-- SIDEBAR -->
-  <div id="sidebar">
-    <div id="sidebar-tabs">
-      <button class="tab-btn active" onclick="showTab('route',this)">🗺 Rute</button>
-      <button class="tab-btn" onclick="showTab('jalan',this)">🛣 Jalan</button>
-      <button class="tab-btn" onclick="showTab('skenario',this)">🎭 Skenario</button>
-      <button class="tab-btn" onclick="showTab('info',this)">ℹ Info</button>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Navigasi kampus UNIB – Dynamic A* Shortest Path dengan skenario kondisi jalan real-time"
+    />
+    <title>UNIB Campus Navigator – Shortest Path</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <!-- ═══ HEADER ═══ -->
+    <div id="header">
+      <span class="logo">🏫</span>
+      <h1>UNIB Campus Navigator</h1>
+      <div class="sub">Universitas Bengkulu – Dynamic A* Engine</div>
+      <div id="clock">--:--:--</div>
+      <button
+        id="btn-toggle-sidebar"
+        class="sidebar-toggle-btn"
+        onclick="toggleSidebar(event)"
+        title="Sembunyikan Panel"
+      >
+        <div class="burger-icon">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </button>
     </div>
 
-    <!-- TAB RUTE -->
-    <div id="tab-route" class="tab-panel active">
-      <div class="form-group">
-        <label>Titik Awal</label>
-        <select id="sel-start"></select>
-      </div>
-      <div class="form-group">
-        <label>Titik Tujuan</label>
-        <select id="sel-end"></select>
-      </div>
-      <div class="form-group">
-        <label>Skenario</label>
-        <select id="sel-scenario"></select>
-      </div>
-      <!-- Scenario info card with affected edges -->
-      <div id="scenario-info" class="scenario-info">
-        <div class="si-label">Deskripsi Skenario</div>
-        <div class="si-desc">—</div>
-        <div id="si-affected" style="margin-top:6px;display:none">
-          <div style="font-size:9px;font-weight:700;color:#7fb4ab;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Jalan Terpengaruh</div>
-          <div id="si-affected-list" style="font-size:11px"></div>
+    <!-- ═══ MAIN ═══ -->
+    <div id="main">
+      <!-- SIDEBAR -->
+      <div id="sidebar">
+        <div id="sidebar-tabs">
+          <button class="tab-btn active" onclick="showTab('route', this)">
+            🗺 Rute
+          </button>
+          <button class="tab-btn" onclick="showTab('jalan', this)">
+            🛣 Jalan
+          </button>
+          <button class="tab-btn" onclick="showTab('skenario', this)">
+            🎭 Skenario
+          </button>
+          <button class="tab-btn" onclick="showTab('info', this)">
+            ℹ Info
+          </button>
+        </div>
+
+        <!-- TAB RUTE -->
+        <div id="tab-route" class="tab-panel active">
+          <div class="form-group">
+            <label>Titik Awal</label>
+            <select id="sel-start"></select>
+          </div>
+          <div class="form-group">
+            <label>Titik Tujuan</label>
+            <select id="sel-end"></select>
+          </div>
+          <div class="form-group">
+            <label>Skenario</label>
+            <select id="sel-scenario"></select>
+          </div>
+          <!-- Scenario info card with affected edges -->
+          <div id="scenario-info" class="scenario-info">
+            <div class="si-label">Deskripsi Skenario</div>
+            <div class="si-desc">—</div>
+            <div id="si-affected" style="margin-top: 6px; display: none">
+              <div
+                style="
+                  font-size: 9px;
+                  font-weight: 700;
+                  color: var(--teal);
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 4px;
+                "
+              >
+                Jalan Terpengaruh
+              </div>
+              <div id="si-affected-list" style="font-size: 11px"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Faktor Waktu (1.0 = normal)</label>
+            <input
+              type="number"
+              id="time-factor"
+              value="1.0"
+              min="0.5"
+              max="5.0"
+              step="0.1"
+            />
+          </div>
+          <button
+            id="btn-find-route"
+            class="btn btn-primary"
+            onclick="findRoute()"
+          >
+            🔍 Cari Rute Tercepat
+          </button>
+          <div class="btn-row">
+            <button class="btn btn-compare" onclick="compareScenarios()">
+              📊 Bandingkan
+            </button>
+            <button class="btn btn-secondary" onclick="clearRoute()">
+              ✕ Bersihkan
+            </button>
+          </div>
+          <div id="alert"></div>
+
+          <!-- Metrics -->
+          <div id="metrics" style="display: none">
+            <div class="section-title">Hasil Rute</div>
+            <div class="metrics-grid">
+              <div class="metric-card">
+                <div class="metric-val" id="m-dist">-</div>
+                <div class="metric-lbl">Jarak (m)</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-val" id="m-eta">-</div>
+                <div class="metric-lbl">ETA (menit)</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-val" id="m-iter">-</div>
+                <div class="metric-lbl">Iterasi A*</div>
+              </div>
+              <div class="metric-card">
+                <div class="metric-val" id="m-ms">-</div>
+                <div class="metric-lbl">Waktu (ms)</div>
+              </div>
+            </div>
+            <div class="section-title" style="margin-top: 8px">
+              Jalur Dilalui
+            </div>
+            <ul id="path-list"></ul>
+          </div>
+        </div>
+
+        <!-- TAB JALAN -->
+        <div id="tab-jalan" class="tab-panel">
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="refreshCondTable()">
+              🔄 Refresh
+            </button>
+            <button class="btn btn-danger" onclick="resetConditions()">
+              🗑 Reset
+            </button>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); padding: 2px 0">
+            Aktifkan <b style="color: var(--teal)">Edit Bobot Jalan</b> lalu klik
+            jalan di peta. Atau klik baris tabel untuk zoom ke jalan.
+          </div>
+          <div style="overflow-x: auto; flex: 1">
+            <table id="cond-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Dari → Ke</th>
+                  <th>Jarak</th>
+                  <th>Kondisi</th>
+                </tr>
+              </thead>
+              <tbody id="cond-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB SKENARIO -->
+        <div id="tab-skenario" class="tab-panel">
+          <div class="section-title">Skenario Aktif</div>
+          <div
+            id="scenario-cards"
+            style="display: flex; flex-direction: column; gap: 8px"
+          ></div>
+          <div class="sep" style="margin: 8px 0"></div>
+          <div class="section-title">Tambah Skenario Baru</div>
+          <div class="form-group">
+            <label>Nama Skenario</label>
+            <input
+              type="text"
+              id="new-sc-name"
+              placeholder="Contoh: Dies Natalis"
+            />
+          </div>
+          <div class="form-group">
+            <label>Deskripsi</label>
+            <input
+              type="text"
+              id="new-sc-desc"
+              placeholder="Kepadatan di area rektorat"
+            />
+          </div>
+          <div class="form-group">
+            <label>Warna</label>
+            <div
+              style="display: flex; gap: 6px; flex-wrap: wrap"
+              id="color-picks"
+            >
+              <label style="cursor: pointer"
+                ><input
+                  type="radio"
+                  name="sc-color"
+                  value="#0f766e"
+                  checked
+                  style="display: none" /><span
+                  class="color-dot"
+                  style="background: #0f766e"
+                ></span
+              ></label>
+              <label style="cursor: pointer"
+                ><input
+                  type="radio"
+                  name="sc-color"
+                  value="#d97706"
+                  style="display: none" /><span
+                  class="color-dot"
+                  style="background: #d97706"
+                ></span
+              ></label>
+              <label style="cursor: pointer"
+                ><input
+                  type="radio"
+                  name="sc-color"
+                  value="#dc2626"
+                  style="display: none" /><span
+                  class="color-dot"
+                  style="background: #dc2626"
+                ></span
+              ></label>
+              <label style="cursor: pointer"
+                ><input
+                  type="radio"
+                  name="sc-color"
+                  value="#7c3aed"
+                  style="display: none" /><span
+                  class="color-dot"
+                  style="background: #7c3aed"
+                ></span
+              ></label>
+              <label style="cursor: pointer"
+                ><input
+                  type="radio"
+                  name="sc-color"
+                  value="#2563eb"
+                  style="display: none" /><span
+                  class="color-dot"
+                  style="background: #2563eb"
+                ></span
+              ></label>
+              <label style="cursor: pointer"
+                ><input
+                  type="radio"
+                  name="sc-color"
+                  value="#059669"
+                  style="display: none" /><span
+                  class="color-dot"
+                  style="background: #059669"
+                ></span
+              ></label>
+            </div>
+          </div>
+
+          <!-- Jalan berdasarkan lokasi gedung -->
+          <div
+            style="
+              padding: 12px;
+              background: var(--bg-card);
+              border-radius: var(--radius);
+              border: 1px solid var(--border);
+              margin-bottom: 12px;
+            "
+          >
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--teal);
+                margin-bottom: 8px;
+              "
+            >
+              🏢 SEKITAR GEDUNG / LOKASI
+            </div>
+            <div class="form-group">
+              <label>Pilih Gedung/Lokasi</label>
+              <select
+                id="sc-location-select"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  font-size: 11px;
+                "
+              >
+                <option value="">
+                  -- Pilih lokasi untuk auto-detect jalan --
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Radius (meter)</label>
+              <input
+                type="number"
+                id="sc-location-radius"
+                value="100"
+                min="10"
+                max="500"
+                step="10"
+                style="
+                  padding: 6px;
+                  font-size: 11px;
+                  width: 100%;
+                "
+              />
+            </div>
+            <div style="display: flex; gap: 6px">
+              <button
+                class="btn btn-secondary"
+                style="flex: 1; font-size: 11px"
+                onclick="autoDetectEdgesNearLocation()"
+              >
+                🔍 Cari Jalan Sekitar
+              </button>
+              <button
+                class="btn btn-secondary"
+                style="flex: 1; font-size: 11px"
+                onclick="clearDetectedEdges()"
+              >
+                ✕ Bersihkan
+              </button>
+            </div>
+            <div
+              id="detected-edges-list"
+              style="
+                margin-top: 8px;
+                padding: 8px;
+                background: var(--bg-card);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                font-size: 11px;
+                color: var(--text);
+                max-height: 120px;
+                overflow-y: auto;
+                display: none;
+              "
+            >
+              <!-- Will be populated with detected edges -->
+            </div>
+          </div>
+
+          <!-- Manual input (alternative) -->
+          <div
+            style="
+              padding: 12px;
+              background: var(--bg-card);
+              border-radius: var(--radius);
+              border: 1px solid var(--border);
+              margin-bottom: 12px;
+            "
+          >
+            <div
+              style="
+                font-size: 12px;
+                font-weight: 700;
+                color: var(--teal);
+                margin-bottom: 8px;
+              "
+            >
+              ⚙️ ATAU INPUT MANUAL
+            </div>
+            <div class="form-group">
+              <label>Bobot Jalan (edge:multiplier, pisahkan koma)</label>
+              <input
+                type="text"
+                id="new-sc-mods"
+                placeholder="E01:2.0, E02:1.5, E18:2.3"
+                style="font-size: 11px"
+              />
+            </div>
+            <div class="form-group">
+              <label>Jalan Ditutup (ID, pisahkan koma)</label>
+              <input
+                type="text"
+                id="new-sc-blocked"
+                placeholder="E41, E33"
+                style="font-size: 11px"
+              />
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="addScenario()">
+            ✚ Simpan Skenario Baru
+          </button>
+        </div>
+
+        <!-- TAB INFO -->
+        <div id="tab-info" class="tab-panel">
+          <div class="section-title">Tentang Aplikasi</div>
+          <div style="font-size: 12px; line-height: 1.8; color: var(--text)">
+            Navigasi kampus UNIB menggunakan algoritma
+            <strong style="color: var(--teal)">Dynamic A*</strong>
+            dengan:<br /><br />
+            🏫 <strong>29 Node</strong> lokasi kampus<br />
+            🛣 <strong>48 Edge</strong> jalur jalan<br />
+            🗂 <strong>Skenario Dinamis</strong> kondisi kampus<br />
+            ⚙ Bobot edge dinamis<br /><br />
+            <strong style="color: var(--teal)">Legenda:</strong><br />
+            🟢 Normal · 🟡 Sibuk (×2) · 🟠 Berlubang (×1.6) · 🔴 Ditutup (∞)<br /><br />
+            <strong style="color: var(--teal)">Cara Pakai:</strong><br />
+            1. Pilih Awal &amp; Tujuan → Cari Rute<br />
+            2. Tekan 📊 Bandingkan untuk lihat semua skenario<br />
+            3. Aktifkan <em>Edit Bobot Jalan</em> → klik jalan<br />
+            4. Klik baris di tab Jalan → zoom ke jalan itu<br />
+            5. Tab 🎭 Skenario untuk kelola &amp; tambah skenario<br />
+          </div>
+          <div class="sep" style="margin: 10px 0"></div>
+          <div class="section-title">Sumber Data Peta</div>
+          <div style="font-size: 12px; line-height: 1.8; color: var(--text-muted)">
+            📍 <strong style="color: var(--teal)">Tile Map</strong>:
+            <a
+              href="https://www.openstreetmap.org"
+              target="_blank"
+              style="color: var(--teal); font-weight: 600;"
+              >OpenStreetMap</a
+            >
+            — peta terbuka dunia, dirender via Leaflet.js<br />
+            📐 <strong style="color: var(--teal)">Koordinat Node</strong>: Koordinat
+            GPS asli 29 lokasi kampus UNIB, dicatat manual menggunakan Google
+            Maps<br />
+            🛤 <strong style="color: var(--teal)">Geometri Jalan</strong>: Polyline
+            koordinat diambil dari dataset OSM & diverifikasi ulang secara
+            manual untuk akurasi sempurna<br />
+            🧭 <strong style="color: var(--teal)">Routing</strong>: Jalan baru
+            menggunakan
+            <a
+              href="https://project-osrm.org"
+              target="_blank"
+              style="color: var(--teal); font-weight: 600;"
+              >OSRM API</a
+            >
+            untuk mendapatkan geometri yang mengikuti jalur jalan nyata<br />
+            📏 <strong style="color: var(--teal)">Jarak</strong>: Dihitung
+            menggunakan formula <em>Haversine</em> dari koordinat GPS, bukan
+            garis lurus
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label>Faktor Waktu (1.0 = normal)</label>
-        <input type="number" id="time-factor" value="1.0" min="0.5" max="5.0" step="0.1">
-      </div>
-      <button id="btn-find-route" class="btn btn-primary" onclick="findRoute()">🔍 Cari Rute Tercepat</button>
-      <div class="btn-row">
-        <button class="btn btn-compare" onclick="compareScenarios()">📊 Bandingkan</button>
-        <button class="btn btn-secondary" onclick="clearRoute()">✕ Bersihkan</button>
-      </div>
-      <div id="alert"></div>
 
-      <!-- Metrics -->
-      <div id="metrics" style="display:none">
-        <div class="section-title">Hasil Rute</div>
-        <div class="metrics-grid">
-          <div class="metric-card"><div class="metric-val" id="m-dist">-</div><div class="metric-lbl">Jarak (m)</div></div>
-          <div class="metric-card"><div class="metric-val" id="m-eta">-</div><div class="metric-lbl">ETA (menit)</div></div>
-          <div class="metric-card"><div class="metric-val" id="m-iter">-</div><div class="metric-lbl">Iterasi A*</div></div>
-          <div class="metric-card"><div class="metric-val" id="m-ms">-</div><div class="metric-lbl">Waktu (ms)</div></div>
+      <!-- MAP -->
+      <div id="map-container">
+
+
+        <div class="map-tools-wrapper" id="map-tools-wrapper">
+          <button
+            id="map-tools-burger"
+            class="map-tools-burger"
+            onclick="toggleMapTools(event)"
+          >
+            ☰ Alat Peta
+          </button>
+          <div class="map-tools" id="map-tools-dropdown">
+            <button
+              id="btn-pick-route"
+              class="map-tool-btn"
+              onclick="setMapMode('pick_route')"
+            >
+              📍 Pilih Rute
+            </button>
+            <button
+              id="btn-edit-road"
+              class="map-tool-btn"
+              onclick="setMapMode('edit_road')"
+            >
+              ✏ Edit Bobot Jalan
+            </button>
+            <button
+              id="btn-add-node"
+              class="map-tool-btn"
+              onclick="setMapMode('add_node')"
+            >
+              🏢 Tambah Gedung
+            </button>
+            <button
+              id="btn-add-edge"
+              class="map-tool-btn"
+              onclick="setMapMode('add_edge')"
+            >
+              🔗 Tambah Jalan
+            </button>
+          </div>
         </div>
-        <div class="section-title" style="margin-top:8px">Jalur Dilalui</div>
-        <ul id="path-list"></ul>
-      </div>
-    </div>
 
-    <!-- TAB JALAN -->
-    <div id="tab-jalan" class="tab-panel">
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="refreshCondTable()">🔄 Refresh</button>
-        <button class="btn btn-danger" onclick="resetConditions()">🗑 Reset</button>
-      </div>
-      <div style="font-size:11px;color:#7fb4ab;padding:2px 0">
-        Aktifkan <b style="color:#5eead4">Edit Bobot Jalan</b> lalu klik jalan di peta. Atau klik baris tabel untuk zoom ke jalan.
-      </div>
-      <div style="overflow-x:auto;flex:1">
-        <table id="cond-table">
-          <thead><tr><th>ID</th><th>Dari → Ke</th><th>Jarak</th><th>Kondisi</th></tr></thead>
-          <tbody id="cond-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- TAB SKENARIO -->
-    <div id="tab-skenario" class="tab-panel">
-      <div class="section-title">Skenario Aktif</div>
-      <div id="scenario-cards" style="display:flex;flex-direction:column;gap:8px"></div>
-      <div class="sep" style="margin:8px 0"></div>
-      <div class="section-title">Tambah Skenario Baru</div>
-      <div class="form-group">
-        <label>Nama Skenario</label>
-        <input type="text" id="new-sc-name" placeholder="Contoh: Dies Natalis">
-      </div>
-      <div class="form-group">
-        <label>Deskripsi</label>
-        <input type="text" id="new-sc-desc" placeholder="Kepadatan di area rektorat">
-      </div>
-      <div class="form-group">
-        <label>Warna</label>
-        <div style="display:flex;gap:6px;flex-wrap:wrap" id="color-picks">
-          <label style="cursor:pointer"><input type="radio" name="sc-color" value="#0f766e" checked style="display:none"><span class="color-dot" style="background:#0f766e"></span></label>
-          <label style="cursor:pointer"><input type="radio" name="sc-color" value="#d97706" style="display:none"><span class="color-dot" style="background:#d97706"></span></label>
-          <label style="cursor:pointer"><input type="radio" name="sc-color" value="#dc2626" style="display:none"><span class="color-dot" style="background:#dc2626"></span></label>
-          <label style="cursor:pointer"><input type="radio" name="sc-color" value="#7c3aed" style="display:none"><span class="color-dot" style="background:#7c3aed"></span></label>
-          <label style="cursor:pointer"><input type="radio" name="sc-color" value="#2563eb" style="display:none"><span class="color-dot" style="background:#2563eb"></span></label>
-          <label style="cursor:pointer"><input type="radio" name="sc-color" value="#059669" style="display:none"><span class="color-dot" style="background:#059669"></span></label>
+        <!-- Map Legend -->
+        <div id="map-legend">
+          <div class="legend-title">Kondisi Jalan</div>
+          <div class="legend-row">
+            <div class="legend-line" style="background: #38bdf8"></div>
+            Normal
+          </div>
+          <div class="legend-row">
+            <div
+              class="legend-line legend-dashed"
+              style="background: #94a3b8"
+            ></div>
+            Koneksi otomatis
+          </div>
+          <div class="legend-row">
+            <div class="legend-line" style="background: #f59e0b"></div>
+            Sibuk
+          </div>
+          <div class="legend-row">
+            <div class="legend-line" style="background: #f97316"></div>
+            Berlubang
+          </div>
+          <div class="legend-row">
+            <div class="legend-line" style="background: #ef4444"></div>
+            Ditutup
+          </div>
+          <div
+            class="legend-row"
+            style="
+              margin-top: 4px;
+              border-top: 1px solid #1a4a42;
+              padding-top: 4px;
+            "
+          >
+            <div
+              class="legend-line"
+              style="background: #f59e0b; height: 4px"
+            ></div>
+            Rute Aktif
+          </div>
         </div>
-      </div>
-      <div class="form-group">
-        <label>Bobot Jalan (edge:multiplier, pisahkan koma)</label>
-        <input type="text" id="new-sc-mods" placeholder="E01:2.0, E02:1.5, E18:2.3">
-      </div>
-      <div class="form-group">
-        <label>Jalan Ditutup (ID, pisahkan koma)</label>
-        <input type="text" id="new-sc-blocked" placeholder="E41, E33">
-      </div>
-      <button class="btn btn-primary" onclick="addScenario()">✚ Simpan Skenario Baru</button>
-    </div>
 
-    <!-- TAB INFO -->
-    <div id="tab-info" class="tab-panel">
-      <div class="section-title">Tentang Aplikasi</div>
-      <div style="font-size:12px;line-height:1.8;color:#a0d4cc">
-        Navigasi kampus UNIB menggunakan algoritma
-        <strong style="color:#5eead4">Dynamic A*</strong> dengan:<br><br>
-        🏫 <strong>29 Node</strong> lokasi kampus<br>
-        🛣 <strong>48 Edge</strong> jalur jalan<br>
-        🗂 <strong>4+ Skenario</strong> kondisi kampus<br>
-        ⚙ Bobot edge dinamis<br><br>
-        <strong style="color:#5eead4">Legenda:</strong><br>
-        🟢 Normal · 🟡 Sibuk (×2) · 🟠 Berlubang (×1.6) · 🔴 Ditutup (∞)<br><br>
-        <strong style="color:#5eead4">Cara Pakai:</strong><br>
-        1. Pilih Awal &amp; Tujuan → Cari Rute<br>
-        2. Tekan 📊 Bandingkan untuk lihat semua skenario<br>
-        3. Aktifkan <em>Edit Bobot Jalan</em> → klik jalan<br>
-        4. Gunakan ✏️ Gambar Jalur untuk ukur panjang<br>
-        5. Klik baris di tab Jalan → zoom ke jalan itu<br>
-        6. Tab 🎭 Skenario untuk kelola &amp; tambah skenario<br>
-      </div>
-      <div class="sep" style="margin:10px 0"></div>
-      <div class="section-title">Sumber Data Peta</div>
-      <div style="font-size:12px;line-height:1.8;color:#a0d4cc">
-        📍 <strong style="color:#5eead4">Tile Map</strong>: <a href="https://www.openstreetmap.org" target="_blank" style="color:#5eead4">OpenStreetMap</a> — peta terbuka dunia, dirender via Leaflet.js<br>
-        📐 <strong style="color:#5eead4">Koordinat Node</strong>: Koordinat GPS asli 29 lokasi kampus UNIB, dicatat manual menggunakan Google Maps<br>
-        🛤 <strong style="color:#5eead4">Geometri Jalan</strong>: Polyline koordinat diambil dari dataset OSM & diverifikasi ulang secara manual untuk akurasi sempurna<br>
-        🧭 <strong style="color:#5eead4">Routing</strong>: Jalan baru menggunakan <a href="https://project-osrm.org" target="_blank" style="color:#5eead4">OSRM API</a> untuk mendapatkan geometri yang mengikuti jalur jalan nyata<br>
-        📏 <strong style="color:#5eead4">Jarak</strong>: Dihitung menggunakan formula <em>Haversine</em> dari koordinat GPS, bukan garis lurus
-      </div>
-    </div>
-  </div>
-
-    <!-- MAP -->
-  <div id="map-container">
-    <div class="map-tools">
-      <button id="btn-pick-route" class="map-tool-btn" onclick="setMapMode('pick_route')">📍 Pilih Rute</button>
-      <button id="btn-edit-road" class="map-tool-btn" onclick="setMapMode('edit_road')">✏ Edit Bobot Jalan</button>
-      <button id="btn-add-node" class="map-tool-btn" onclick="setMapMode('add_node')">🏢 Tambah Gedung</button>
-      <button id="btn-add-edge" class="map-tool-btn" onclick="setMapMode('add_edge')">🔗 Tambah Jalan</button>
-      <button id="btn-osm-sync" class="map-tool-btn" onclick="generateOSMRoads()" style="background:var(--purple);color:white">🌍 Auto-Generate Jalan</button>
-    </div>
-
-    <!-- Map Legend -->
-    <div id="map-legend">
-      <div class="legend-title">Kondisi Jalan</div>
-      <div class="legend-row"><div class="legend-line" style="background:#38bdf8"></div> Normal</div>
-      <div class="legend-row"><div class="legend-line legend-dashed" style="background:#94a3b8"></div> Koneksi otomatis</div>
-      <div class="legend-row"><div class="legend-line" style="background:#f59e0b"></div> Sibuk</div>
-      <div class="legend-row"><div class="legend-line" style="background:#f97316"></div> Berlubang</div>
-      <div class="legend-row"><div class="legend-line" style="background:#ef4444"></div> Ditutup</div>
-      <div class="legend-row" style="margin-top:4px;border-top:1px solid #1a4a42;padding-top:4px">
-        <div class="legend-line" style="background:#f59e0b;height:4px"></div> Rute Aktif
-      </div>
-    </div>
-
-    <div id="edge-step-indicator" class="edge-step-indicator">
-      <div class="edge-step-dot"></div>
-      <span class="esi-text">Klik gedung pertama</span>
-    </div>
-
-    <!-- Draw Road Panel -->
-    <div id="draw-road-panel">
-      <div class="drp-inner">
-        <div class="drp-icon">✏️</div>
-        <div class="drp-info">
-          <div class="drp-title">Gambar Jalur — <span id="drp-edge-id" style="color:#f59e0b"></span></div>
-          <div id="drp-subtitle" class="drp-subtitle">Klik pada peta mengikuti jalur jalan</div>
+        <div id="edge-step-indicator" class="edge-step-indicator">
+          <div class="edge-step-dot"></div>
+          <span class="esi-text">Klik gedung pertama</span>
         </div>
-        <div class="drp-dist-block">
-          <div class="drp-dist-val" id="drp-dist-val">0.0</div>
-          <div class="drp-dist-unit">meter</div>
+
+        <div id="map"></div>
+
+        <!-- Edge Editor Panel -->
+        <div id="edge-editor" class="edge-editor"></div>
+      </div>
+    </div>
+
+    <!-- Modal: Konfirmasi Tambah Jalan -->
+    <div id="add-edge-modal">
+      <div class="add-edge-box">
+        <h3 class="add-edge-title">🔗 Konfirmasi Tambah Jalan</h3>
+        <div class="add-edge-desc" id="add-edge-modal-desc">
+          Menghubungkan titik A → B
         </div>
-        <div class="drp-divider"></div>
-        <div class="drp-actions">
-          <button id="drp-apply" class="drp-btn drp-btn-apply" onclick="finishDraw()" disabled>✓ Terapkan</button>
-          <button id="drp-undo" class="drp-btn drp-btn-undo" onclick="undoDraw()" disabled>↩ Undo</button>
-          <button class="drp-btn drp-btn-cancel" onclick="cancelDraw()">✕ Batal</button>
+        <div class="add-edge-field">
+          <label>Jarak (meter) — opsional, kosongkan untuk hitung otomatis</label>
+          <input
+            id="add-edge-distance-input"
+            type="number"
+            min="1"
+            step="1"
+            placeholder="Hitung otomatis via OSRM..."
+          />
+        </div>
+        <div class="add-edge-field">
+          <label>Arah</label>
+          <select id="add-edge-dir-input">
+            <option value="true">↔ Dua Arah (bidirectional)</option>
+            <option value="false">→ Satu Arah (dari A ke B)</option>
+          </select>
+        </div>
+        <div class="add-edge-actions">
+          <button class="add-edge-btn-cancel" onclick="cancelAddEdgeModal()">
+            Batal
+          </button>
+          <button class="add-edge-btn-confirm" onclick="confirmAddEdge()">
+            ✓ Buat Jalan
+          </button>
         </div>
       </div>
     </div>
 
-    <div id="map"></div>
+    <!-- Compare Scenarios Modal -->
+    <div id="compare-overlay">
+      <div id="compare-modal">
+        <div class="compare-header">
+          <h3>📊 Perbandingan Skenario</h3>
+          <button class="compare-close" onclick="closeCompare()">✕</button>
+        </div>
+        <div id="compare-grid" class="compare-grid"></div>
+      </div>
+    </div>
 
-    <!-- Edge Editor Panel -->
-    <div id="edge-editor" class="edge-editor"></div>
-  </div>
-</div>
-
-<!-- Modal: Konfirmasi Tambah Jalan -->
-<div id="add-edge-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
-  <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:24px; width:340px; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-    <h3 style="margin:0 0 16px; color:#e2e8f0; font-size:16px;">🔗 Konfirmasi Tambah Jalan</h3>
-    <div style="font-size:13px; color:#94a3b8; margin-bottom:16px;" id="add-edge-modal-desc">
-      Menghubungkan titik A → B
-    </div>
-    <div style="margin-bottom:16px;">
-      <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:6px;">Jarak (meter) — opsional, kosongkan untuk hitung otomatis</label>
-      <input id="add-edge-distance-input" type="number" min="1" step="1" placeholder="Hitung otomatis via OSRM..."
-        style="width:100%; box-sizing:border-box; padding:8px 12px; background:#0f172a; border:1px solid #475569; border-radius:8px; color:#e2e8f0; font-size:14px;" />
-    </div>
-    <div style="margin-bottom:16px;">
-      <label style="display:block; font-size:12px; color:#94a3b8; margin-bottom:6px;">Arah</label>
-      <select id="add-edge-dir-input"
-        style="width:100%; padding:8px 12px; background:#0f172a; border:1px solid #475569; border-radius:8px; color:#e2e8f0; font-size:14px;">
-        <option value="true">↔ Dua Arah (bidirectional)</option>
-        <option value="false">→ Satu Arah (dari A ke B)</option>
-      </select>
-    </div>
-    <div style="display:flex; gap:10px; justify-content:flex-end;">
-      <button onclick="cancelAddEdgeModal()" style="padding:8px 16px; border:1px solid #475569; background:transparent; color:#94a3b8; border-radius:8px; cursor:pointer; font-size:13px;">Batal</button>
-      <button onclick="confirmAddEdge()" style="padding:8px 16px; background:#0ea5e9; border:none; color:white; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600;">✓ Buat Jalan</button>
-    </div>
-  </div>
-</div>
-
-<!-- Compare Scenarios Modal -->
-<div id="compare-overlay">
-  <div id="compare-modal">
-    <div class="compare-header">
-      <h3>📊 Perbandingan Skenario</h3>
-      <button class="compare-close" onclick="closeCompare()">✕</button>
-    </div>
-    <div id="compare-grid" class="compare-grid"></div>
-  </div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{{ url_for('static', filename='app.js') }}"></script>
-</body>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
 </html>

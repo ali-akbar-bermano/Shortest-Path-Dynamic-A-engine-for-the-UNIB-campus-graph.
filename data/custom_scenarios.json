@@ -1,14 +1,22 @@
 [
   {
-    "id": "Dies Natalis",
-    "description": "Perayaan ulang tahun universitas",
-    "color": "#7c3aed",
-    "edge_modifiers": {
-      "E01": 2.5,
-      "E03": 1.8
-    },
+    "id": "Acara Rektorat",
+    "description": "Acara resmi di rektorat, lalu lintas padat di sekitar rektorat",
+    "color": "#0f766e",
+    "edge_modifiers": {},
     "blocked_edges": [
-      "E33"
+      "CE90",
+      "CE96",
+      "CE126",
+      "CE128",
+      "CE94",
+      "CE130",
+      "CE131",
+      "CE129",
+      "CE136",
+      "CE137",
+      "CE127",
+      "CE181"
     ]
   }
 ]

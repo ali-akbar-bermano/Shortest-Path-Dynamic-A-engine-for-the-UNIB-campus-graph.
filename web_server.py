@@ -368,7 +368,7 @@ def _get_road_routing_base(display_engine):
                     to_road,
                     _scaled_segment_distance(edge, start_point, end_point),
                     [start_point, end_point],
-                    edge["id"],
+                    edge.get("condition_id", edge["id"]),
                     surface=surface,
                     bidirectional=edge.get("bidirectional", True),
                 )
@@ -429,7 +429,7 @@ def _build_road_routing_graph(display_engine, start_id, end_id):
         segment_index = max(0, min(segment_index, len(geometry) - 2))
         road_node = add_road_node(projected)
         surface = edge.get("surface", "ASPHALT")
-        source_edge_id = edge["id"]
+        source_edge_id = edge.get("condition_id", edge["id"])
 
         route_edges.append(
             _route_edge(
@@ -514,9 +514,9 @@ def _connected_components(nodes, edges):
     components.sort(key=len, reverse=True)
     return components
 
-def _auto_edge(edge_id, from_node, to_node, geometry, surface="ASPHALT"):
+def _auto_edge(edge_id, from_node, to_node, geometry, surface="ASPHALT", condition_id=None):
     geometry = _clean_geometry(geometry)
-    return {
+    res = {
         "id": edge_id,
         "from": from_node,
         "to": to_node,
@@ -526,6 +526,9 @@ def _auto_edge(edge_id, from_node, to_node, geometry, surface="ASPHALT"):
         "geometry": geometry,
         "source": "auto",
     }
+    if condition_id:
+        res["condition_id"] = condition_id
+    return res
 
 def _augment_with_auto_road_links(engine, deleted_edges):
     components = _connected_components(engine.nodes, engine.edges)
@@ -585,9 +588,10 @@ def _augment_with_auto_road_links(engine, deleted_edges):
             point,
         )
         surface = target_edge.get("surface", "ASPHALT")
+        target_cond_id = target_edge.get("condition_id", target_edge["id"])
         for generated in (
-            _auto_edge(split_a_id, target_edge["from"], junction_id, first_geom, surface),
-            _auto_edge(split_b_id, junction_id, target_edge["to"], second_geom, surface),
+            _auto_edge(split_a_id, target_edge["from"], junction_id, first_geom, surface, condition_id=target_cond_id),
+            _auto_edge(split_b_id, junction_id, target_edge["to"], second_geom, surface, condition_id=target_cond_id),
             _auto_edge(
                 link_id,
                 node_id,
@@ -653,6 +657,7 @@ def _split_edge_into_custom_segments(custom, edge, waypoint_node, nearest):
     edge_a_id = _next_custom_edge_id(custom, used_ids)
     used_ids.add(edge_a_id)
     edge_b_id = _next_custom_edge_id(custom, used_ids)
+    cond_id = edge.get("condition_id", edge_id)
     custom["edges"].extend([
         {
             "id": edge_a_id,
@@ -662,6 +667,7 @@ def _split_edge_into_custom_segments(custom, edge, waypoint_node, nearest):
             "surface": surface,
             "bidirectional": True,
             "geometry": first_geom,
+            "condition_id": cond_id,
         },
         {
             "id": edge_b_id,
@@ -671,6 +677,7 @@ def _split_edge_into_custom_segments(custom, edge, waypoint_node, nearest):
             "surface": surface,
             "bidirectional": True,
             "geometry": second_geom,
+            "condition_id": cond_id,
         },
     ])
     custom["custom_distances"].pop(edge_id, None)
@@ -1270,147 +1277,7 @@ def api_update_edge_direction(edge_id):
     direction_label = "Dua Arah" if bidirectional else "Satu Arah"
     return jsonify({"ok": True, "edge_id": edge_id, "bidirectional": bidirectional, "direction": direction_label})
 
-@app.route("/api/osm-sync", methods=["POST", "DELETE"])
-def api_osm_sync():
-    global engine  # declare at top
-    import urllib.request
-    import json
-    from collections import defaultdict
-    from algorithm import haversine
 
-    if request.method == "DELETE":
-        custom = _load_custom_graph()
-        custom["nodes"] = [n for n in custom.get("nodes", []) if not str(n.get("id")).startswith("OSMN_")]
-        custom["edges"] = [e for e in custom.get("edges", []) if not str(e.get("id")).startswith("OSME_")]
-        _save_custom_graph(custom)
-        engine = _build_combined_engine()
-        _invalidate_route_cache()
-        return jsonify({"ok": True})
-
-    # Bounding box for UNIB area
-    south, west, north, east = -3.7663, 102.2666, -3.7533, 102.2800
-    
-    query = f"""
-    [out:json];
-    (
-      way["highway"~"footway|path|pedestrian|service|residential|unclassified|tertiary|secondary|primary"]({south},{west},{north},{east});
-    );
-    out body;
-    >;
-    out skel qt;
-    """
-    url = "https://overpass-api.de/api/interpreter"
-    try:
-        req = urllib.request.Request(url, data=query.encode("utf-8"), headers={'User-Agent': 'UNIB-Navigator'})
-        with urllib.request.urlopen(req) as response:
-            osm_data = json.loads(response.read().decode())
-    except Exception as e:
-        return jsonify({"error": f"Gagal mengambil data OSM: {str(e)}"}), 500
-
-    nodes = {}
-    for element in osm_data["elements"]:
-        if element["type"] == "node":
-            nodes[element["id"]] = (element["lat"], element["lon"])
-            
-    ways = []
-    node_usage = defaultdict(int)
-    for element in osm_data["elements"]:
-        if element["type"] == "way" and "nodes" in element:
-            way_nodes = element["nodes"]
-            valid_nodes = [n for n in way_nodes if n in nodes]
-            if len(valid_nodes) < 2:
-                continue
-            element["nodes"] = valid_nodes
-            ways.append(element)
-            for i, nid in enumerate(valid_nodes):
-                if i == 0 or i == len(valid_nodes) - 1:
-                    node_usage[nid] += 2
-                else:
-                    node_usage[nid] += 1
-
-    custom = _load_custom_graph()
-    
-    # Remove existing OSM-generated nodes and edges to make it idempotent
-    custom["nodes"] = [n for n in custom.get("nodes", []) if not str(n.get("id")).startswith("OSMN_")]
-    custom["edges"] = [e for e in custom.get("edges", []) if not str(e.get("id")).startswith("OSME_")]
-    
-    existing_edges = engine.edges
-    
-    def is_duplicate(geom):
-        if not geom: return True
-        start_pt = geom[0]
-        end_pt = geom[-1]
-        for e in existing_edges:
-            e_geom = e.get("geometry", [])
-            if len(e_geom) >= 2:
-                dist1 = haversine(start_pt[0], start_pt[1], e_geom[0][0], e_geom[0][1]) + haversine(end_pt[0], end_pt[1], e_geom[-1][0], e_geom[-1][1])
-                dist2 = haversine(start_pt[0], start_pt[1], e_geom[-1][0], e_geom[-1][1]) + haversine(end_pt[0], end_pt[1], e_geom[0][0], e_geom[0][1])
-                if dist1 < 20 or dist2 < 20: 
-                    return True
-        return False
-
-    intersection_nodes = {nid for nid, count in node_usage.items() if count >= 2}
-    
-    nodes_added = 0
-    osm_node_mapping = {}
-    for nid in intersection_nodes:
-        new_id = f"OSMN_{nid}"
-        osm_node_mapping[nid] = new_id
-        custom.setdefault("nodes", []).append({
-            "id": new_id,
-            "name": f"OSM_WP_{nid}",
-            "type": "Waypoint",
-            "lat": nodes[nid][0],
-            "lon": nodes[nid][1]
-        })
-        nodes_added += 1
-
-    edges_added = 0
-    for way in ways:
-        way_nodes = way["nodes"]
-        surface = "ASPHALT"
-        hw = way.get("tags", {}).get("highway", "")
-        if hw in ["footway", "path", "pedestrian"]: surface = "CONCRETE"
-        elif hw in ["track", "dirt"]: surface = "DIRT"
-        
-        current_segment_nodes = [way_nodes[0]]
-        for i in range(1, len(way_nodes)):
-            nid = way_nodes[i]
-            current_segment_nodes.append(nid)
-            
-            if nid in intersection_nodes or i == len(way_nodes) - 1:
-                start_nid = current_segment_nodes[0]
-                end_nid = current_segment_nodes[-1]
-                geom = [[nodes[n][0], nodes[n][1]] for n in current_segment_nodes]
-                
-                if not is_duplicate(geom):
-                    dist = 0.0
-                    for j in range(len(geom)-1):
-                        dist += haversine(geom[j][0], geom[j][1], geom[j+1][0], geom[j+1][1])
-                        
-                    edge_id = f"OSME_{way['id']}_{start_nid}_{end_nid}"
-                    custom.setdefault("edges", []).append({
-                        "id": edge_id,
-                        "from": osm_node_mapping[start_nid],
-                        "to": osm_node_mapping[end_nid],
-                        "distance": round(dist, 1),
-                        "surface": surface,
-                        "bidirectional": True,
-                        "geometry": geom
-                    })
-                    edges_added += 1
-                
-                current_segment_nodes = [nid]
-
-    _save_custom_graph(custom)
-    engine = _build_combined_engine()
-    _invalidate_route_cache()
-    
-    return jsonify({
-        "ok": True,
-        "nodes_added": nodes_added,
-        "edges_added": edges_added
-    })
 
 @app.route("/api/nodes/<node_id>/location", methods=["PUT"])
 def api_update_node_location(node_id):
@@ -1516,6 +1383,12 @@ def api_scenarios():
         custom = _load_custom_scenarios()
         custom = [c for c in custom if c["id"] != sid]
         _save_custom_scenarios(custom)
+        
+        global engine
+        engine = _build_combined_engine()
+        set_overlap_cache(engine.edges)
+        _invalidate_route_cache()
+        
         return jsonify({"ok": True})
     return jsonify(_load_custom_scenarios())
 

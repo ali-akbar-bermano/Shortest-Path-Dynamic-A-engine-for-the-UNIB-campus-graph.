@@ -30,9 +30,6 @@ class SurfaceType(Enum):
 
 class Scenario(Enum):
     NORMAL      = "Normal"
-    WISUDA      = "Wisuda"
-    UTBK        = "UTBK"
-    EVENT_BESAR = "Event Besar"
 
 
 @dataclass
@@ -84,23 +81,5 @@ SCENARIO_CONFIG: Dict[Scenario, dict] = {
     Scenario.NORMAL: {
         "description": "Kondisi kampus hari biasa.",
         "color": "#0f766e", "edge_modifiers": {}, "blocked_edges": set(),
-    },
-    Scenario.WISUDA: {
-        "description": "Arus tamu padat di gerbang utama, rektorat, dan gedung acara.",
-        "color": "#d97706",
-        "edge_modifiers": {"E01":2.3,"E02":1.8,"E03":1.7,"E18":1.9,"E25":2.0,"E26":2.2,"E29":1.6},
-        "blocked_edges": set(),
-    },
-    Scenario.UTBK: {
-        "description": "Zona ujian dipadatkan di UPA TIK, FKIP, Perpustakaan, Teknik, FKIK, FEB, dan Hukum.",
-        "color": "#dc2626",
-        "edge_modifiers": {"E20":1.7,"E22":1.7,"E24":1.8,"E25":1.7,"E27":1.9,"E31":1.7,"E35":1.6,"E37":1.8,"E08":1.6,"E09":1.6},
-        "blocked_edges": {"E41"},
-    },
-    Scenario.EVENT_BESAR: {
-        "description": "Kepadatan diarahkan di sekitar stadion, sport center, dan koridor timur.",
-        "color": "#7c3aed",
-        "edge_modifiers": {"E10":2.2,"E11":1.8,"E36":2.2,"E37":2.4,"E39":2.0,"E48":2.0,"E28":1.7,"E29":1.6},
-        "blocked_edges": set(),
     },
 }

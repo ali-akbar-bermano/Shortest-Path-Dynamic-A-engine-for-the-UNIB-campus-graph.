@@ -1,4 +1,9 @@
 {
-  "edge_conditions": {},
+  "edge_conditions": {
+    "CE92": {
+      "status": "POTHOLE",
+      "severity": 1.6
+    }
+  },
   "edge_directions": {}
 }

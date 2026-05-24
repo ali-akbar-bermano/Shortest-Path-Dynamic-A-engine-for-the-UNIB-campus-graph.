@@ -157,9 +157,11 @@
               🗑 Reset
             </button>
           </div>
-          <div style="font-size: 11px; color: var(--text-muted); padding: 2px 0">
-            Aktifkan <b style="color: var(--teal)">Edit Bobot Jalan</b> lalu klik
-            jalan di peta. Atau klik baris tabel untuk zoom ke jalan.
+          <div
+            style="font-size: 11px; color: var(--text-muted); padding: 2px 0"
+          >
+            Aktifkan <b style="color: var(--teal)">Edit Bobot Jalan</b> lalu
+            klik jalan di peta. Atau klik baris tabel untuk zoom ke jalan.
           </div>
           <div style="overflow-x: auto; flex: 1">
             <table id="cond-table">
@@ -295,11 +297,7 @@
               <label>Pilih Gedung/Lokasi</label>
               <select
                 id="sc-location-select"
-                style="
-                  width: 100%;
-                  padding: 6px;
-                  font-size: 11px;
-                "
+                style="width: 100%; padding: 6px; font-size: 11px"
               >
                 <option value="">
                   -- Pilih lokasi untuk auto-detect jalan --
@@ -315,11 +313,7 @@
                 min="10"
                 max="500"
                 step="10"
-                style="
-                  padding: 6px;
-                  font-size: 11px;
-                  width: 100%;
-                "
+                style="padding: 6px; font-size: 11px; width: 100%"
               />
             </div>
             <div style="display: flex; gap: 6px">
@@ -406,60 +400,126 @@
         <div id="tab-info" class="tab-panel">
           <div class="section-title">Tentang Aplikasi</div>
           <div style="font-size: 12px; line-height: 1.7; color: var(--text)">
-            Navigasi Kampus UNIB menggunakan algoritma <strong style="color: var(--teal)">Dynamic A*</strong> dengan optimasi graf dan segmen jalan presisi tinggi:<br /><br />
-            🏫 <strong><span id="info-poi-count">51</span> POI Utama + <span id="info-wp-count">146</span> Waypoint</strong> (Total <strong id="info-total-nodes">197</strong> Node hasil segmentasi)<br />
-            🛣 <strong><span id="info-road-count">194</span> Jalan Utama + <span id="info-segment-count">14</span> Segmen Otomatis</strong> (Total <strong id="info-total-edges">208</strong> Edge jalan)<br />
-            🗂 <strong>Skenario Dinamis</strong> kondisi lalu lintas kampus secara real-time<br />
-            ⚙ <strong>Bobot Edge Dinamis &amp; Deduplikasi Jalur Otomatis</strong><br /><br />
+            Navigasi Kampus UNIB menggunakan algoritma
+            <strong style="color: var(--teal)">Dynamic A*</strong> dengan
+            optimasi graf dan segmen jalan presisi tinggi:<br /><br />
+            🏫
+            <strong
+              ><span id="info-poi-count">51</span> POI Utama +
+              <span id="info-wp-count">146</span> Waypoint</strong
+            >
+            (Total <strong id="info-total-nodes">197</strong> Node hasil
+            segmentasi)<br />
+            🛣
+            <strong
+              ><span id="info-road-count">194</span> Jalan Utama +
+              <span id="info-segment-count">14</span> Segmen Otomatis</strong
+            >
+            (Total <strong id="info-total-edges">208</strong> Edge jalan)<br />
+            🗂 <strong>Skenario Dinamis</strong> kondisi lalu lintas kampus
+            secara real-time<br />
+            ⚙
+            <strong>Bobot Edge Dinamis &amp; Deduplikasi Jalur Otomatis</strong
+            ><br /><br />
 
-            <strong style="color: var(--teal)">🟢 Legenda &amp; Multiplier Kondisi Jalan:</strong><br />
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 6px 0; font-size: 11px;">
+            <strong style="color: var(--teal)"
+              >🟢 Legenda &amp; Multiplier Kondisi Jalan:</strong
+            ><br />
+            <div
+              style="
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                margin: 6px 0;
+                font-size: 11px;
+              "
+            >
               <div>🟢 <strong>Normal</strong>: ×1.0</div>
-              <div>🌟 <strong>Rute VIP</strong>: ×0.5</div>
               <div>🟡 <strong>Sibuk (Busy)</strong>: ×2.0</div>
               <div>🟠 <strong>Berlubang</strong>: ×1.6</div>
-              <div>➖ <strong>Sempit (Narrow)</strong>: ×1.8</div>
-              <div>⚠️ <strong>Perbaikan</strong>: ×2.5</div>
-              <div style="grid-column: span 2;">🔴 <strong>Ditutup (Closed)</strong>: ∞ (Tidak dapat dilalui)</div>
-            </div><br />
-
-            <strong style="color: var(--teal)">🛣 Jenis Permukaan Jalan (Base Weight):</strong><br />
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 6px 0; font-size: 11px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
-              <div>🚗 <strong>Aspal (Asphalt)</strong>: ×1.0</div>
-              <div>🧱 <strong>Beton (Concrete)</strong>: ×1.1</div>
-              <div>🪵 <strong>Tanah (Dirt)</strong>: ×1.4</div>
-              <div>🪜 <strong>Tangga (Stairs)</strong>: ×1.8</div>
-              <div style="grid-column: span 2;">📐 <strong>Ramp (Kursi Roda)</strong>: ×1.3</div>
-            </div><br />
+              <div style="grid-column: span 2">
+                🔴 <strong>Ditutup (Closed)</strong>: ∞ (Tidak dapat dilalui)
+              </div>
+            </div>
+            <br />
 
             <strong style="color: var(--teal)">👉 Cara Pakai:</strong><br />
-            <ul style="margin: 6px 0; padding-left: 16px; font-size: 11.5px; display: flex; flex-direction: column; gap: 6px; list-style-type: disc;">
-              <li><strong>Pilih Awal &amp; Tujuan</strong>: Pilih titik asal dan tujuan pada formulir Rute, lalu klik <strong>Cari Rute Tercepat</strong>.</li>
-              <li><strong>Bandingkan Skenario</strong>: Tekan tombol <strong>📊 Bandingkan</strong> untuk menganalisis ETA rute di semua skenario kampus.</li>
-              <li><strong>Edit Bobot Jalan</strong>: Aktifkan mode <strong>✏ Edit Bobot Jalan</strong> di alat peta, lalu klik jalur jalan langsung pada peta untuk memodifikasi kondisi, jarak, atau menjadikannya satu arah.</li>
-              <li><strong>Navigasi Tabel Jalan</strong>: Klik baris jalan manapun di tab <strong>Jalan</strong> untuk langsung melakukan zoom ke segmen jalan tersebut.</li>
-              <li><strong>Kelola Skenario</strong>: Masuk ke tab <strong>🎭 Skenario</strong> untuk mengaktifkan, menonaktifkan, atau membuat skenario kemacetan kustom baru dengan deteksi radius.</li>
-              <li><strong>Dinamis Landmark</strong>: Geser landmark (Drag-and-Drop POI) secara langsung di peta untuk perubahan rute dinamis real-time.</li>
+            <ul
+              style="
+                margin: 6px 0;
+                padding-left: 16px;
+                font-size: 11.5px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                list-style-type: disc;
+              "
+            >
+              <li>
+                <strong>Pilih Awal &amp; Tujuan</strong>: Pilih titik asal dan
+                tujuan pada formulir Rute, lalu klik
+                <strong>Cari Rute Tercepat</strong>.
+              </li>
+              <li>
+                <strong>Bandingkan Skenario</strong>: Tekan tombol
+                <strong>📊 Bandingkan</strong> untuk menganalisis ETA rute di
+                semua skenario kampus.
+              </li>
+              <li>
+                <strong>Edit Bobot Jalan</strong>: Aktifkan mode
+                <strong>✏ Edit Bobot Jalan</strong> di alat peta, lalu klik
+                jalur jalan langsung pada peta untuk memodifikasi kondisi,
+                jarak, atau menjadikannya satu arah.
+              </li>
+              <li>
+                <strong>Navigasi Tabel Jalan</strong>: Klik baris jalan manapun
+                di tab <strong>Jalan</strong> untuk langsung melakukan zoom ke
+                segmen jalan tersebut.
+              </li>
+              <li>
+                <strong>Kelola Skenario</strong>: Masuk ke tab
+                <strong>🎭 Skenario</strong> untuk mengaktifkan, menonaktifkan,
+                atau membuat skenario kemacetan kustom baru dengan deteksi
+                radius.
+              </li>
+              <li>
+                <strong>Dinamis Landmark</strong>: Geser landmark (Drag-and-Drop
+                POI) secara langsung di peta untuk perubahan rute dinamis
+                real-time.
+              </li>
             </ul>
           </div>
           <div class="sep" style="margin: 14px 0"></div>
           <div class="section-title">Sumber Data Peta</div>
-          <div style="font-size: 11.5px; line-height: 1.8; color: var(--text-muted)">
-            📍 <strong style="color: var(--teal)">Tile Map</strong>: OpenStreetMap — peta terbuka dunia, dirender via Leaflet.js<br />
-            📐 <strong style="color: var(--teal)">Koordinat Node</strong>: Koordinat GPS asli 51 lokasi landmark kampus UNIB (awalnya dicatat manual menggunakan Google Maps sebanyak 29 lokasi utama, kemudian diperluas dan diposisikan ulang secara presisi melalui antarmuka peta interaktif)<br />
-            🛤 <strong style="color: var(--teal)">Geometri Jalan</strong>: Polyline koordinat diambil dari dataset OSM &amp; diverifikasi ulang secara manual untuk akurasi sempurna<br />
-            🧭 <strong style="color: var(--teal)">Routing</strong>: Jalan baru menggunakan OSRM API untuk mendapatkan geometri yang mengikuti jalur jalan nyata<br />
-            📏 <strong style="color: var(--teal)">Jarak</strong>: Dihitung menggunakan formula <em>Haversine</em> dari koordinat GPS asli, bukan garis lurus
+          <div
+            style="
+              font-size: 11.5px;
+              line-height: 1.8;
+              color: var(--text-muted);
+            "
+          >
+            📍 <strong style="color: var(--teal)">Tile Map</strong>:
+            OpenStreetMap — peta terbuka dunia, dirender via Leaflet.js<br />
+            📐 <strong style="color: var(--teal)">Koordinat Node</strong>:
+            Koordinat GPS asli 51 lokasi landmark kampus UNIB (awalnya dicatat
+            manual menggunakan Google Maps sebanyak 29 lokasi utama, kemudian
+            diperluas dan diposisikan ulang secara presisi melalui antarmuka
+            peta interaktif)<br />
+            🛤 <strong style="color: var(--teal)">Geometri Jalan</strong>:
+            Polyline koordinat diambil dari dataset OSM &amp; diverifikasi ulang
+            secara manual untuk akurasi sempurna<br />
+            🧭 <strong style="color: var(--teal)">Routing</strong>: Jalan baru
+            menggunakan OSRM API untuk mendapatkan geometri yang mengikuti jalur
+            jalan nyata<br />
+            📏 <strong style="color: var(--teal)">Jarak</strong>: Dihitung
+            menggunakan formula <em>Haversine</em> dari koordinat GPS asli,
+            bukan garis lurus
+          </div>
         </div>
       </div>
-    </div>
-
-
 
       <!-- MAP -->
       <div id="map-container">
-
-
         <div class="map-tools-wrapper" id="map-tools-wrapper">
           <button
             id="map-tools-burger"
@@ -562,7 +622,9 @@
           Menghubungkan titik A → B
         </div>
         <div class="add-edge-field">
-          <label>Jarak (meter) — opsional, kosongkan untuk hitung otomatis</label>
+          <label
+            >Jarak (meter) — opsional, kosongkan untuk hitung otomatis</label
+          >
           <input
             id="add-edge-distance-input"
             type="number"

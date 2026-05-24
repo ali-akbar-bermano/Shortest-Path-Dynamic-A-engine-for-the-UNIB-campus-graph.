@@ -255,11 +255,63 @@ async function loadGraph() {
     drawEdges();
     drawNodes();
     renderScenarioCards();
+    updateInfoStats();
   } catch (e) {
     console.error("Load failed:", e);
     // Initialize empty graph on error
     graph = { nodes: [], edges: [], scenarios: [] };
   }
+}
+
+function updateInfoStats() {
+  if (!graph || !graph.nodes || !graph.edges) return;
+
+  const pois = graph.nodes.filter(
+    (n) => {
+      const t = (n.type || "").toLowerCase();
+      return t !== "waypoint" && t !== "road";
+    }
+  );
+  const wps = graph.nodes.filter(
+    (n) => {
+      const t = (n.type || "").toLowerCase();
+      return t === "waypoint" || t === "road";
+    }
+  );
+  const baseEdges = graph.edges.filter(
+    (e) => {
+      const id = e.id || "";
+      return e.source !== "auto" && 
+             !id.startsWith("AUTO_") && 
+             !id.startsWith("RSEG_") && 
+             !id.startsWith("ACCESS_") && 
+             !id.startsWith("RACCESS_");
+    }
+  );
+  const autoEdges = graph.edges.filter(
+    (e) => {
+      const id = e.id || "";
+      return e.source === "auto" || 
+             id.startsWith("AUTO_") || 
+             id.startsWith("RSEG_") || 
+             id.startsWith("ACCESS_") || 
+             id.startsWith("RACCESS_");
+    }
+  );
+
+  const elPoi = document.getElementById("info-poi-count");
+  const elWp = document.getElementById("info-wp-count");
+  const elTotalNodes = document.getElementById("info-total-nodes");
+  const elRoad = document.getElementById("info-road-count");
+  const elSegment = document.getElementById("info-segment-count");
+  const elTotalEdges = document.getElementById("info-total-edges");
+
+  if (elPoi) elPoi.textContent = pois.length;
+  if (elWp) elWp.textContent = wps.length;
+  if (elTotalNodes) elTotalNodes.textContent = graph.nodes.length;
+  if (elRoad) elRoad.textContent = baseEdges.length;
+  if (elSegment) elSegment.textContent = autoEdges.length;
+  if (elTotalEdges) elTotalEdges.textContent = graph.edges.length;
 }
 
 function populateSelects() {
@@ -1603,3 +1655,4 @@ function toggleSidebar(event) {
   map.invalidateSize();
   setTimeout(() => map.invalidateSize(), 300);
 }
+

@@ -649,3 +649,4 @@ input[type="radio"]:checked + .color-dot {
   .edge-editor { left:8px; right:8px; bottom:8px; width:auto; max-height:46vh; }
   .edge-step-indicator { top:54px; max-width:calc(100% - 20px); white-space:normal; text-align:center; }
 }
+
